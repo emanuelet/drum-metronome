@@ -25,14 +25,14 @@ watch(localTempo, (newVal) => {
 const handleTap = () => {
   const bpm = tap();
   const count = tapCount();
-  
+
   if (count === 1) {
     tapMessage.value = 'Tap again...';
   } else if (bpm !== null) {
     localTempo.value = bpm;
     tapMessage.value = `BPM: ${bpm}`;
   }
-  
+
   setTimeout(() => {
     if (tapCount() === 0) {
       tapMessage.value = '';
@@ -52,6 +52,35 @@ const handleInputChange = (e: Event) => {
     localTempo.value = value;
   }
 };
+
+// Italian tempo markings
+interface TempoMark {
+  name: string;
+  bpm: number;
+  description: string;
+}
+
+const tempoMarks: TempoMark[] = [
+  { name: 'Largo', bpm: 50, description: 'Broadly' },
+  { name: 'Adagio', bpm: 70, description: 'Slowly' },
+  { name: 'Andante', bpm: 95, description: 'At a walking pace' },
+  { name: 'Moderato', bpm: 115, description: 'Moderately' },
+  { name: 'Allegro', bpm: 135, description: 'Fast' },
+  { name: 'Presto', bpm: 180, description: 'Very fast' },
+  { name: 'Prestissimo', bpm: 220, description: 'Extremely fast' }
+];
+
+const setTempoFromMark = (bpm: number) => {
+  localTempo.value = bpm;
+  reset();
+};
+
+const getSliderPosition = (bpm: number): string => {
+  const min = 20;
+  const max = 300;
+  const percentage = ((bpm - min) / (max - min)) * 100;
+  return `${percentage}%`;
+};
 </script>
 
 <template>
@@ -67,21 +96,38 @@ const handleInputChange = (e: Event) => {
       />
       <span class="tempo-label">BPM</span>
     </div>
-    
-    <input
-      type="range"
-      class="tempo-slider"
-      :value="localTempo"
-      @input="handleSliderChange"
-      min="20"
-      max="300"
-    />
-    
+
+    <div class="slider-container">
+      <input
+        type="range"
+        class="tempo-slider"
+        :value="localTempo"
+        @input="handleSliderChange"
+        min="20"
+        max="300"
+      />
+
+      <div class="tempo-marks">
+        <button
+          v-for="mark in tempoMarks"
+          :key="mark.name"
+          class="tempo-mark"
+          :class="{ 'is-active': localTempo >= mark.bpm - 10 && localTempo <= mark.bpm + 10 }"
+          :style="{ left: getSliderPosition(mark.bpm) }"
+          @click="setTempoFromMark(mark.bpm)"
+          :title="`${mark.name}: ${mark.description} (~${mark.bpm} BPM)`"
+        >
+          <span class="mark-tick"></span>
+          <span class="mark-label">{{ mark.name }}</span>
+        </button>
+      </div>
+    </div>
+
     <div class="tempo-range">
       <span>20</span>
       <span>300</span>
     </div>
-    
+
     <button class="tap-button" @click="handleTap">
       TAP TEMPO
       <span v-if="tapMessage" class="tap-message">{{ tapMessage }}</span>
@@ -129,6 +175,11 @@ const handleInputChange = (e: Event) => {
   color: var(--text-secondary);
 }
 
+.slider-container {
+  position: relative;
+  padding-bottom: 2.5rem;
+}
+
 .tempo-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -137,6 +188,8 @@ const handleInputChange = (e: Event) => {
   background: var(--bg-tertiary);
   border-radius: 4px;
   outline: none;
+  position: relative;
+  z-index: 2;
 }
 
 .tempo-slider::-webkit-slider-thumb {
@@ -148,6 +201,8 @@ const handleInputChange = (e: Event) => {
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.1s ease, background 0.2s ease;
+  position: relative;
+  z-index: 3;
 }
 
 .tempo-slider::-webkit-slider-thumb:hover {
@@ -162,6 +217,68 @@ const handleInputChange = (e: Event) => {
   border-radius: 50%;
   cursor: pointer;
   border: none;
+  z-index: 3;
+}
+
+.tempo-marks {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 40px;
+  pointer-events: none;
+}
+
+.tempo-mark {
+  position: absolute;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.tempo-mark:hover {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.tempo-mark.is-active .mark-tick {
+  background: var(--accent-primary);
+  height: 16px;
+}
+
+.tempo-mark.is-active .mark-label {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.mark-tick {
+  width: 2px;
+  height: 10px;
+  background: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.mark-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tempo-mark:hover .mark-tick {
+  background: var(--accent-secondary);
+  height: 14px;
+}
+
+.tempo-mark:hover .mark-label {
+  color: var(--accent-secondary);
 }
 
 .tempo-range {
@@ -169,6 +286,7 @@ const handleInputChange = (e: Event) => {
   justify-content: space-between;
   font-size: 0.875rem;
   color: var(--text-muted);
+  margin-top: -1rem;
 }
 
 .tap-button {
@@ -204,5 +322,20 @@ const handleInputChange = (e: Event) => {
   border-radius: 4px;
   font-size: 0.875rem;
   white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .tempo-control {
+    padding: 1rem;
+  }
+
+  .tempo-input {
+    font-size: 2.5rem;
+    width: 100px;
+  }
+
+  .mark-label {
+    font-size: 0.55rem;
+  }
 }
 </style>

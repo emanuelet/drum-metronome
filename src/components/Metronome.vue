@@ -63,18 +63,18 @@ const canPlay = computed(() => {
     </header>
     
     <main class="metronome-main">
-      <section class="control-section">
-        <TempoControl
-          :model-value="tempo"
-          @update:model-value="handleTempoChange"
-        />
-      </section>
-      
       <section class="visualizer-section">
         <Visualizer
           :pattern="pattern"
           :current-beat="currentBeat"
           :is-playing="isPlaying"
+        />
+      </section>
+      
+      <section class="control-section">
+        <TempoControl
+          :model-value="tempo"
+          @update:model-value="handleTempoChange"
         />
       </section>
       
@@ -144,6 +144,8 @@ const canPlay = computed(() => {
   width: 100%;
 }
 
+
+
 .play-section {
   display: flex;
   flex-direction: column;
@@ -201,40 +203,15 @@ const canPlay = computed(() => {
   .metronome {
     padding: 2rem;
   }
-  
+
   .title {
     font-size: 2.5rem;
   }
-  
+
   .metronome-main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "control visualizer"
-      "pattern pattern"
-      "presets presets"
-      "play play";
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
-  }
-  
-  .control-section {
-    grid-area: control;
-  }
-  
-  .visualizer-section {
-    grid-area: visualizer;
-  }
-  
-  .pattern-section {
-    grid-area: pattern;
-  }
-  
-  .presets-section {
-    grid-area: presets;
-  }
-  
-  .play-section {
-    grid-area: play;
   }
 }
 </style>
