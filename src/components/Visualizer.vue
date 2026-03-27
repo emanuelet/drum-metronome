@@ -66,99 +66,95 @@ const containerStyle = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/variables' as *;
+
 .visualizer {
-  padding: 2rem;
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  padding: $spacing-2xl;
+  @include card;
 }
 
 .visualizer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
+  @include flex-center;
+  gap: $spacing-md;
   flex-wrap: nowrap;
   overflow-x: auto;
   min-height: 120px;
-  padding: 0.5rem;
+  padding: $spacing-sm;
 }
 
 .beat-indicator {
   width: var(--beat-size, 64px);
   height: var(--beat-size, 64px);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   font-size: var(--beat-font-size, 1.5rem);
   font-weight: 700;
-  background: var(--beat-normal);
+  background: $beat-normal;
   color: white;
-  transition: all 0.1s ease;
+  transition: all $transition-fast;
   position: relative;
   flex-shrink: 0;
-}
 
-.beat-indicator::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  transition: border-color 0.1s ease;
-}
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    transition: border-color $transition-fast;
+  }
 
-.beat-indicator.left {
-  background: var(--beat-left);
-}
+  &.left {
+    background: $beat-left;
+  }
 
-.beat-indicator.right {
-  background: var(--beat-right);
-}
+  &.right {
+    background: $beat-right;
+  }
 
-.beat-indicator.accent {
-  background: var(--beat-accent);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px var(--beat-accent);
-}
+  &.accent {
+    background: $beat-accent;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px $beat-accent;
+  }
 
-.beat-indicator.is-active {
-  transform: scale(1.2);
-  box-shadow: 0 0 25px var(--beat-active);
-}
+  &.is-active {
+    transform: scale(1.2);
+    box-shadow: 0 0 25px $beat-active;
 
-.beat-indicator.is-active::before {
-  border-color: var(--beat-active);
-}
+    &::before {
+      border-color: $beat-active;
+    }
 
-.beat-indicator.accent.is-active {
-  transform: scale(1.3);
-  box-shadow: 0 0 30px var(--beat-accent), 0 0 45px var(--beat-active);
-}
+    &.accent {
+      transform: scale(1.3);
+      box-shadow: 0 0 30px $beat-accent, 0 0 45px $beat-active;
+    }
+  }
 
-.beat-indicator.is-playing {
-  opacity: 0.6;
-}
+  &.is-playing {
+    opacity: 0.6;
+  }
 
-.beat-indicator.is-active {
-  opacity: 1;
+  &.is-active {
+    opacity: 1;
+  }
 }
 
 .empty-pattern {
-  color: var(--text-muted);
+  color: $text-muted;
   font-style: italic;
   text-align: center;
 }
 
-@media (max-width: 640px) {
+@media (max-width: $breakpoint-sm) {
   .visualizer {
-    padding: 1rem;
+    padding: $spacing-lg;
   }
 
   .visualizer-container {
-    gap: 0.5rem;
+    gap: $spacing-sm;
     min-height: 80px;
   }
 }

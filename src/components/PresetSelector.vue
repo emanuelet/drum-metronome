@@ -64,51 +64,51 @@ const selectPreset = (preset: Preset) => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/variables' as *;
+
 .preset-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @include flex-column;
+  gap: $spacing-sm;
 }
 
 .preset-label {
   font-weight: 600;
-  color: var(--text-primary);
+  color: $text-primary;
 }
 
 .preset-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.5rem;
+  gap: $spacing-sm;
 }
 
 .preset-button {
-  display: flex;
-  flex-direction: column;
-  padding: 0.75rem;
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
+  @include flex-column;
+  padding: $spacing-md;
+  background: $bg-secondary;
+  border: 2px solid $border-color;
+  border-radius: $radius-md;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all $transition-base;
   text-align: left;
-}
 
-.preset-button:hover {
-  border-color: var(--accent-primary);
-  background: var(--bg-tertiary);
-  transform: translateY(-2px);
+  &:hover {
+    border-color: $accent-primary;
+    background: $bg-tertiary;
+    transform: translateY(-2px);
+  }
 }
 
 .preset-name {
   font-weight: 600;
-  color: var(--text-primary);
+  color: $text-primary;
   font-size: 0.9rem;
 }
 
 .preset-desc {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 0.25rem;
+  font-size: $font-sm;
+  color: $text-muted;
+  margin-top: $spacing-xs;
 }
 </style>

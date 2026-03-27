@@ -106,35 +106,36 @@ const canPlay = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/variables' as *;
+
 .metronome {
   max-width: 800px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: $spacing-xl;
   min-height: 100vh;
-}
 
-.metronome-header {
-  text-align: center;
-  margin-bottom: 2rem;
+  &-header {
+    text-align: center;
+    margin-bottom: $spacing-2xl;
+  }
+
+  &-main {
+    @include flex-column;
+    gap: $spacing-xl;
+  }
 }
 
 .title {
-  font-size: 2rem;
+  font-size: $font-4xl;
   font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  color: $text-primary;
+  margin-bottom: $spacing-sm;
 }
 
 .subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.metronome-main {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  color: $text-secondary;
+  font-size: $font-lg;
 }
 
 .control-section,
@@ -144,74 +145,65 @@ const canPlay = computed(() => {
   width: 100%;
 }
 
-
-
 .play-section {
-  display: flex;
-  flex-direction: column;
+  @include flex-column;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
 }
 
 .play-button {
   width: 100%;
   max-width: 300px;
   padding: 1.25rem 3rem;
-  font-size: 1.5rem;
+  font-size: $font-3xl;
   font-weight: 700;
-  background: var(--accent-primary);
+  background: $accent-primary;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: $radius-lg;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all $transition-base;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
 
-.play-button:hover:not(.is-disabled) {
-  background: var(--accent-secondary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
+  &:hover:not(.is-disabled) {
+    background: $accent-secondary;
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+  }
 
-.play-button:active:not(.is-disabled) {
-  transform: translateY(0);
-}
+  &:active:not(.is-disabled) {
+    transform: translateY(0);
+  }
 
-.play-button.is-playing {
-  background: var(--beat-accent);
-}
+  &.is-playing {
+    background: $beat-accent;
 
-.play-button.is-playing:hover {
-  background: #ff5252;
-}
+    &:hover {
+      background: #ff5252;
+    }
+  }
 
-.play-button.is-disabled {
-  background: var(--beat-normal);
-  cursor: not-allowed;
-  opacity: 0.5;
+  &.is-disabled {
+    background: $beat-normal;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 .play-hint {
-  color: var(--text-muted);
-  font-size: 0.875rem;
+  color: $text-muted;
+  font-size: $font-base;
 }
 
-@media (min-width: 768px) {
+@media (min-width: $breakpoint-md) {
   .metronome {
-    padding: 2rem;
+    padding: $spacing-2xl;
   }
 
   .title {
-    font-size: 2.5rem;
-  }
-
-  .metronome-main {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+    font-size: $font-5xl;
   }
 }
 </style>

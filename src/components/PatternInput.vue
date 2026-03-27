@@ -125,112 +125,107 @@ const clearPattern = () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/variables' as *;
+
 .pattern-input {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @include flex-column;
+  gap: $spacing-sm;
 }
 
 .pattern-label {
   font-weight: 600;
-  color: var(--text-primary);
+  color: $text-primary;
 }
 
 .pattern-input-wrapper {
   position: relative;
-  display: flex;
-  align-items: center;
+  @include flex-center;
 }
 
 .pattern-field {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
-  font-size: 1.25rem;
+  padding: $spacing-md 2.5rem $spacing-md $spacing-lg;
+  font-size: $font-2xl;
   font-family: monospace;
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
+  background: $bg-secondary;
+  border: 2px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
 
-.pattern-field:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-}
+  &:focus {
+    @include input-focus;
+  }
 
-.pattern-field.has-error {
-  border-color: var(--beat-accent);
+  &.has-error {
+    border-color: $beat-accent;
+  }
 }
 
 .clear-button {
   position: absolute;
-  right: 0.5rem;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0 0.5rem;
-  transition: color 0.2s ease;
-}
+  right: $spacing-sm;
+  @include button-reset;
+  color: $text-muted;
+  font-size: $font-3xl;
+  padding: 0 $spacing-sm;
+  transition: color $transition-base;
 
-.clear-button:hover {
-  color: var(--beat-accent);
+  &:hover {
+    color: $beat-accent;
+  }
 }
 
 .error-message {
-  color: var(--beat-accent);
-  font-size: 0.875rem;
-  padding: 0.25rem 0;
+  color: $beat-accent;
+  font-size: $font-base;
+  padding: $spacing-xs 0;
 }
 
 .pattern-help {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
+  font-size: $font-base;
+  color: $text-secondary;
 
-.pattern-help strong {
-  color: var(--text-primary);
+  strong {
+    color: $text-primary;
+  }
 }
 
 .pattern-preview {
   display: flex;
-  gap: 0.5rem;
+  gap: $spacing-sm;
   flex-wrap: wrap;
-  padding: 0.75rem;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  margin-top: 0.5rem;
+  padding: $spacing-md;
+  background: $bg-tertiary;
+  border-radius: $radius-md;
+  margin-top: $spacing-sm;
 }
 
 .beat-char {
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: $font-lg;
   border-radius: 50%;
-  background: var(--beat-normal);
+  background: $beat-normal;
   color: white;
-  transition: transform 0.2s ease;
-}
+  transition: transform $transition-base;
 
-.beat-char.is-left {
-  background: var(--beat-left);
-}
+  &.is-left {
+    background: $beat-left;
+  }
 
-.beat-char.is-right {
-  background: var(--beat-right);
-}
+  &.is-right {
+    background: $beat-right;
+  }
 
-.beat-char.is-accent {
-  background: var(--beat-accent);
-  transform: scale(1.1);
-  box-shadow: 0 0 8px var(--beat-accent);
+  &.is-accent {
+    background: $beat-accent;
+    transform: scale(1.1);
+    box-shadow: 0 0 8px $beat-accent;
+  }
 }
 </style>

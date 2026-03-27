@@ -135,44 +135,40 @@ const getSliderPosition = (bpm: number): string => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/variables' as *;
+
 .tempo-control {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  @include flex-column;
+  gap: $spacing-lg;
+  padding: $spacing-xl;
+  @include card;
 }
 
 .tempo-display {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.5rem;
+  @include flex-center;
+  gap: $spacing-sm;
 }
 
 .tempo-input {
-  font-size: 3rem;
+  font-size: $font-6xl;
   font-weight: 700;
   width: 120px;
   text-align: center;
   background: transparent;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  padding: 0.25rem;
-}
+  border: 2px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
+  padding: $spacing-xs;
 
-.tempo-input:focus {
-  outline: none;
-  border-color: var(--accent-primary);
+  &:focus {
+    @include input-focus;
+  }
 }
 
 .tempo-label {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
+  font-size: $font-xl;
+  color: $text-secondary;
 }
 
 .slider-container {
@@ -185,39 +181,30 @@ const getSliderPosition = (bpm: number): string => {
   appearance: none;
   width: 100%;
   height: 8px;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
+  background: $bg-tertiary;
+  border-radius: $radius-sm;
   outline: none;
   position: relative;
   z-index: 2;
-}
 
-.tempo-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: transform 0.1s ease, background 0.2s ease;
-  position: relative;
-  z-index: 3;
-}
+  &::-webkit-slider-thumb {
+    @include slider-thumb;
 
-.tempo-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  background: var(--accent-secondary);
-}
+    &:hover {
+      transform: scale(1.1);
+      background: $accent-secondary;
+    }
+  }
 
-.tempo-slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  z-index: 3;
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: $accent-primary;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    z-index: 3;
+  }
 }
 
 .tempo-marks {
@@ -232,83 +219,83 @@ const getSliderPosition = (bpm: number): string => {
 .tempo-mark {
   position: absolute;
   transform: translateX(-50%);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+  @include button-reset;
   pointer-events: auto;
-  display: flex;
-  flex-direction: column;
+  @include flex-column;
   align-items: center;
-  gap: 0.25rem;
-  transition: all 0.2s ease;
-}
+  gap: $spacing-xs;
+  transition: all $transition-base;
 
-.tempo-mark:hover {
-  transform: translateX(-50%) translateY(-2px);
-}
+  &:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
 
-.tempo-mark.is-active .mark-tick {
-  background: var(--accent-primary);
-  height: 16px;
-}
+  &.is-active {
+    .mark-tick {
+      background: $accent-primary;
+      height: 16px;
+    }
 
-.tempo-mark.is-active .mark-label {
-  color: var(--accent-primary);
-  font-weight: 600;
+    .mark-label {
+      color: $accent-primary;
+      font-weight: 600;
+    }
+  }
+
+  &:hover {
+    .mark-tick {
+      background: $accent-secondary;
+      height: 14px;
+    }
+
+    .mark-label {
+      color: $accent-secondary;
+    }
+  }
 }
 
 .mark-tick {
   width: 2px;
   height: 10px;
-  background: var(--text-muted);
-  transition: all 0.2s ease;
+  background: $text-muted;
+  transition: all $transition-base;
 }
 
 .mark-label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: $font-xs;
+  color: $text-muted;
   white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.tempo-mark:hover .mark-tick {
-  background: var(--accent-secondary);
-  height: 14px;
-}
-
-.tempo-mark:hover .mark-label {
-  color: var(--accent-secondary);
+  transition: all $transition-base;
 }
 
 .tempo-range {
   display: flex;
   justify-content: space-between;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-top: -1rem;
+  font-size: $font-base;
+  color: $text-muted;
+  margin-top: -$spacing-lg;
 }
 
 .tap-button {
-  padding: 1rem 2rem;
-  font-size: 1rem;
+  padding: $spacing-lg $spacing-2xl;
+  font-size: $font-lg;
   font-weight: 600;
-  background: var(--accent-primary);
+  background: $accent-primary;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: $radius-md;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all $transition-base;
   position: relative;
-}
 
-.tap-button:hover {
-  background: var(--accent-secondary);
-  transform: translateY(-2px);
-}
+  &:hover {
+    background: $accent-secondary;
+    transform: translateY(-2px);
+  }
 
-.tap-button:active {
-  transform: translateY(0);
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .tap-message {
@@ -316,21 +303,21 @@ const getSliderPosition = (bpm: number): string => {
   top: -30px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  background: $bg-tertiary;
+  color: $text-primary;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-sm;
+  font-size: $font-base;
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
+@media (max-width: $breakpoint-sm) {
   .tempo-control {
-    padding: 1rem;
+    padding: $spacing-lg;
   }
 
   .tempo-input {
-    font-size: 2.5rem;
+    font-size: $font-5xl;
     width: 100px;
   }
 
