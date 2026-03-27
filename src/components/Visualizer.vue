@@ -52,7 +52,11 @@ const containerStyle = computed(() => {
 });
 
 const gapProgress = computed(() => {
-  if (!props.gapEnabled || props.measuresWithClick === undefined || props.measuresWithoutClick === undefined) {
+  if (
+    !props.gapEnabled ||
+    props.measuresWithClick === undefined ||
+    props.measuresWithoutClick === undefined
+  ) {
     return null;
   }
   const total = props.measuresWithClick + props.measuresWithoutClick;

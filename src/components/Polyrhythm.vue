@@ -17,17 +17,28 @@ const localEnabled = ref(props.enabled);
 const leftPatternStr = ref(props.leftHandPattern.join(' '));
 const rightPatternStr = ref(props.rightHandPattern.join(' '));
 
-watch(() => props.enabled, (newVal) => {
-  localEnabled.value = newVal;
-});
+watch(
+  () => props.enabled,
+  (newVal) => {
+    localEnabled.value = newVal;
+  }
+);
 
-watch(() => props.leftHandPattern, (newVal) => {
-  leftPatternStr.value = newVal.join(' ');
-}, { deep: true });
+watch(
+  () => props.leftHandPattern,
+  (newVal) => {
+    leftPatternStr.value = newVal.join(' ');
+  },
+  { deep: true }
+);
 
-watch(() => props.rightHandPattern, (newVal) => {
-  rightPatternStr.value = newVal.join(' ');
-}, { deep: true });
+watch(
+  () => props.rightHandPattern,
+  (newVal) => {
+    rightPatternStr.value = newVal.join(' ');
+  },
+  { deep: true }
+);
 
 watch(localEnabled, (newVal) => {
   emit('update:enabled', newVal);
@@ -36,7 +47,7 @@ watch(localEnabled, (newVal) => {
 const parsePattern = (input: string): string[] => {
   const clean = input.replace(/\s/g, '').toUpperCase();
   const result: string[] = [];
-  
+
   for (let i = 0; i < clean.length; i++) {
     if (clean[i] === '!') {
       if (result.length > 0) {
@@ -46,7 +57,7 @@ const parsePattern = (input: string): string[] => {
       result.push(clean[i]);
     }
   }
-  
+
   return result;
 };
 

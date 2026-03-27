@@ -17,17 +17,26 @@ const localEnabled = ref(props.enabled);
 const localWithClick = ref(props.measuresWithClick);
 const localWithoutClick = ref(props.measuresWithoutClick);
 
-watch(() => props.enabled, (newVal) => {
-  localEnabled.value = newVal;
-});
+watch(
+  () => props.enabled,
+  (newVal) => {
+    localEnabled.value = newVal;
+  }
+);
 
-watch(() => props.measuresWithClick, (newVal) => {
-  localWithClick.value = newVal;
-});
+watch(
+  () => props.measuresWithClick,
+  (newVal) => {
+    localWithClick.value = newVal;
+  }
+);
 
-watch(() => props.measuresWithoutClick, (newVal) => {
-  localWithoutClick.value = newVal;
-});
+watch(
+  () => props.measuresWithoutClick,
+  (newVal) => {
+    localWithoutClick.value = newVal;
+  }
+);
 
 watch(localEnabled, (newVal) => {
   emit('update:enabled', newVal);

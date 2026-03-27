@@ -125,11 +125,11 @@ export function useMetronome() {
       if (polyrhythmEnabled.value) {
         // Polyrhythm mode - play both hands
         playPolyrhythmBeats();
-        
+
         // Update beat counters for polyrhythm
         leftHandBeat.value++;
         rightHandBeat.value++;
-        
+
         // Update measure counter for gap training
         if (leftHandPattern.value.length > 0) {
           const beatsPerMeasure = leftHandPattern.value.length;
@@ -143,7 +143,7 @@ export function useMetronome() {
         if (pattern.value.length > 0) {
           const beatType = pattern.value[beatCounter.value % pattern.value.length];
           playBeat(beatType);
-          
+
           // Update measure counter for gap training
           if (beatCounter.value % pattern.value.length === 0 && beatCounter.value > 0) {
             currentMeasure.value++;
