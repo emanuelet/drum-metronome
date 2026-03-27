@@ -5,6 +5,18 @@ const props = defineProps<{
   pattern: string[];
   currentBeat: number;
   isPlaying: boolean;
+  // Gap training props
+  gapEnabled?: boolean;
+  isInGap?: boolean;
+  currentMeasure?: number;
+  measuresWithClick?: number;
+  measuresWithoutClick?: number;
+  // Polyrhythm props
+  polyrhythmEnabled?: boolean;
+  leftHandPattern?: string[];
+  rightHandPattern?: string[];
+  leftHandBeat?: number;
+  rightHandBeat?: number;
 }>();
 
 const getBeatClass = (beat: string): string => {
@@ -23,14 +35,12 @@ const containerStyle = computed(() => {
   if (beatCount === 0) return {};
 
   // Calculate size based on number of beats
-  // Base size is 64px, minimum is 32px
   const baseSize = 64;
   const minSize = 32;
-  const maxBeats = 16; // At 16+ beats, use minimum size
+  const maxBeats = 16;
 
   let size = baseSize;
   if (beatCount > 8) {
-    // Linear interpolation between baseSize and minSize
     const ratio = Math.min((beatCount - 8) / (maxBeats - 8), 1);
     size = baseSize - (baseSize - minSize) * ratio;
   }
@@ -40,11 +50,46 @@ const containerStyle = computed(() => {
     '--beat-font-size': `${size * 0.375}px`,
   };
 });
+
+const gapProgress = computed(() => {
+  if (!props.gapEnabled || props.measuresWithClick === undefined || props.measuresWithoutClick === undefined) {
+    return null;
+  }
+  const total = props.measuresWithClick + props.measuresWithoutClick;
+  const current = (props.currentMeasure || 0) % total;
+  return {
+    current,
+    total,
+    inGap: props.isInGap || false,
+    withClick: props.measuresWithClick,
+    withoutClick: props.measuresWithoutClick,
+  };
+});
 </script>
 
 <template>
-  <div class="visualizer">
-    <div class="visualizer-container" :style="containerStyle">
+  <div class="visualizer" :class="{ 'is-in-gap': isInGap }">
+    <!-- Gap Mode Indicator -->
+    <div v-if="gapEnabled && gapProgress" class="gap-indicator">
+      <div class="gap-status" :class="{ 'in-gap': isInGap }">
+        {{ isInGap ? '🔇 GAP MODE' : '🔊 PLAYING' }}
+      </div>
+      <div class="gap-progress-bar">
+        <div
+          v-for="i in gapProgress.total"
+          :key="i"
+          class="gap-progress-segment"
+          :class="{
+            'is-past': i - 1 < gapProgress.current,
+            'is-current': i - 1 === gapProgress.current,
+            'is-gap': i > gapProgress.withClick
+          }"
+        />
+      </div>
+    </div>
+
+    <!-- Standard Pattern Visualizer -->
+    <div v-if="!polyrhythmEnabled" class="visualizer-container" :style="containerStyle">
       <div
         v-for="(beat, index) in pattern"
         :key="index"
@@ -53,7 +98,8 @@ const containerStyle = computed(() => {
           getBeatClass(beat),
           {
             'is-active': isPlaying && currentBeat === index,
-            'is-playing': isPlaying
+            'is-playing': isPlaying,
+            'is-muted': isInGap
           }
         ]"
       >
@@ -61,6 +107,51 @@ const containerStyle = computed(() => {
       </div>
       <div v-if="pattern.length === 0" class="empty-pattern">
         Enter a pattern to see visualization
+      </div>
+    </div>
+
+    <!-- Polyrhythm Visualizer -->
+    <div v-else class="polyrhythm-visualizer">
+      <div class="hand-pattern">
+        <label class="hand-label">Left Hand</label>
+        <div class="hand-beats">
+          <div
+            v-for="(beat, index) in leftHandPattern"
+            :key="`left-${index}`"
+            class="beat-indicator small"
+            :class="[
+              getBeatClass(beat),
+              {
+                'is-active': isPlaying && (leftHandBeat || 0) % (leftHandPattern?.length || 1) === index,
+                'is-playing': isPlaying,
+                'is-muted': isInGap
+              }
+            ]"
+          >
+            <span class="beat-label">{{ getBeatLabel(beat) }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hand-pattern">
+        <label class="hand-label">Right Hand</label>
+        <div class="hand-beats">
+          <div
+            v-for="(beat, index) in rightHandPattern"
+            :key="`right-${index}`"
+            class="beat-indicator small"
+            :class="[
+              getBeatClass(beat),
+              {
+                'is-active': isPlaying && (rightHandBeat || 0) % (rightHandPattern?.length || 1) === index,
+                'is-playing': isPlaying,
+                'is-muted': isInGap
+              }
+            ]"
+          >
+            <span class="beat-label">{{ getBeatLabel(beat) }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -72,8 +163,74 @@ const containerStyle = computed(() => {
 .visualizer {
   padding: $spacing-2xl;
   @include card;
+  transition: background-color $transition-base;
+
+  &.is-in-gap {
+    background: rgba($bg-secondary, 0.5);
+  }
 }
 
+// Gap Indicator
+.gap-indicator {
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-lg;
+  border-bottom: 1px solid $border-color;
+}
+
+.gap-status {
+  text-align: center;
+  font-weight: 700;
+  font-size: $font-lg;
+  color: $beat-active;
+  margin-bottom: $spacing-sm;
+  padding: $spacing-sm;
+  background: rgba($beat-active, 0.1);
+  border-radius: $radius-md;
+
+  &.in-gap {
+    color: $text-muted;
+    background: rgba($text-muted, 0.1);
+  }
+}
+
+.gap-progress-bar {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  height: 8px;
+}
+
+.gap-progress-segment {
+  flex: 1;
+  max-width: 40px;
+  height: 100%;
+  background: $bg-tertiary;
+  border-radius: 4px;
+  transition: background-color $transition-base;
+
+  &.is-past {
+    background: $beat-active;
+  }
+
+  &.is-current {
+    background: $accent-primary;
+    box-shadow: 0 0 8px $accent-primary;
+  }
+
+  &.is-gap {
+    background: rgba($text-muted, 0.3);
+
+    &.is-past {
+      background: $text-muted;
+    }
+
+    &.is-current {
+      background: $beat-accent;
+    }
+  }
+}
+
+// Standard Visualizer
 .visualizer-container {
   @include flex-center;
   gap: $spacing-md;
@@ -103,6 +260,12 @@ const containerStyle = computed(() => {
     border-radius: 50%;
     border: 3px solid transparent;
     transition: border-color $transition-fast;
+  }
+
+  &.small {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
   }
 
   &.left {
@@ -140,12 +303,41 @@ const containerStyle = computed(() => {
   &.is-active {
     opacity: 1;
   }
+
+  &.is-muted {
+    opacity: 0.3;
+    filter: grayscale(100%);
+  }
 }
 
 .empty-pattern {
   color: $text-muted;
   font-style: italic;
   text-align: center;
+}
+
+// Polyrhythm Visualizer
+.polyrhythm-visualizer {
+  @include flex-column;
+  gap: $spacing-lg;
+}
+
+.hand-pattern {
+  @include flex-column;
+  gap: $spacing-sm;
+}
+
+.hand-label {
+  font-weight: 600;
+  color: $text-primary;
+  font-size: $font-base;
+}
+
+.hand-beats {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 @media (max-width: $breakpoint-sm) {
@@ -156,6 +348,12 @@ const containerStyle = computed(() => {
   .visualizer-container {
     gap: $spacing-sm;
     min-height: 80px;
+  }
+
+  .beat-indicator.small {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
 }
 </style>

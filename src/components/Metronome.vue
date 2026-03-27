@@ -1,23 +1,73 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useMetronome } from '../composables/useMetronome';
 import TempoControl from './TempoControl.vue';
 import PatternInput from './PatternInput.vue';
 import Visualizer from './Visualizer.vue';
 import PresetSelector from './PresetSelector.vue';
+import GapTraining from './GapTraining.vue';
+import Polyrhythm from './Polyrhythm.vue';
 
 const pattern = ref<string[]>(['R', 'L', 'R', 'L']);
 const tempo = ref(120);
 
-const { isPlaying, currentBeat, start, stop, setTempo, setPattern, initAudioContext } =
-  useMetronome();
+// Gap training state
+const gapEnabled = ref(false);
+const measuresWithClick = ref(4);
+const measuresWithoutClick = ref(2);
+
+// Polyrhythm state
+const polyrhythmEnabled = ref(false);
+const leftHandPattern = ref<string[]>(['L', 'L', 'L']);
+const rightHandPattern = ref<string[]>(['R', 'R', 'R', 'R']);
+
+const {
+  isPlaying,
+  currentBeat,
+  isInGap,
+  currentMeasure,
+  leftHandBeat,
+  rightHandBeat,
+  start,
+  stop,
+  setTempo,
+  setPattern,
+  initAudioContext,
+  toggleGapTraining,
+  setGapMeasures,
+  togglePolyrhythm,
+  setPolyrhythmPatterns,
+} = useMetronome();
+
+// Watch for gap training changes
+watch(gapEnabled, (enabled) => {
+  toggleGapTraining(enabled);
+});
+
+watch([measuresWithClick, measuresWithoutClick], ([withClick, withoutClick]) => {
+  setGapMeasures(withClick, withoutClick);
+});
+
+// Watch for polyrhythm changes
+watch(polyrhythmEnabled, (enabled) => {
+  togglePolyrhythm(enabled);
+});
+
+watch([leftHandPattern, rightHandPattern], ([left, right]) => {
+  setPolyrhythmPatterns(left, right);
+});
 
 const togglePlay = () => {
   initAudioContext();
   if (isPlaying.value) {
     stop();
   } else {
-    if (pattern.value.length > 0) {
+    if (polyrhythmEnabled.value) {
+      if (leftHandPattern.value.length > 0 || rightHandPattern.value.length > 0) {
+        setPolyrhythmPatterns(leftHandPattern.value, rightHandPattern.value);
+        start();
+      }
+    } else if (pattern.value.length > 0) {
       setPattern(pattern.value);
       start();
     }
@@ -35,6 +85,10 @@ const handlePatternChange = (newPattern: string[]) => {
 };
 
 const handlePresetSelect = (presetPattern: string[]) => {
+  if (polyrhythmEnabled.value) {
+    // Disable polyrhythm when selecting a standard preset
+    polyrhythmEnabled.value = false;
+  }
   pattern.value = presetPattern;
   setPattern(presetPattern);
 };
@@ -44,6 +98,9 @@ const playButtonText = computed(() => {
 });
 
 const canPlay = computed(() => {
+  if (polyrhythmEnabled.value) {
+    return leftHandPattern.value.length > 0 || rightHandPattern.value.length > 0;
+  }
   return pattern.value.length > 0;
 });
 </script>
@@ -54,34 +111,51 @@ const canPlay = computed(() => {
       <h1 class="title">Drum Metronome</h1>
       <p class="subtitle">Practice with sticking patterns</p>
     </header>
-    
+
     <main class="metronome-main">
       <section class="visualizer-section">
         <Visualizer
           :pattern="pattern"
           :current-beat="currentBeat"
           :is-playing="isPlaying"
+          :gap-enabled="gapEnabled"
+          :is-in-gap="isInGap"
+          :current-measure="currentMeasure"
+          :measures-with-click="measuresWithClick"
+          :measures-without-click="measuresWithoutClick"
+          :polyrhythm-enabled="polyrhythmEnabled"
+          :left-hand-pattern="leftHandPattern"
+          :right-hand-pattern="rightHandPattern"
+          :left-hand-beat="leftHandBeat"
+          :right-hand-beat="rightHandBeat"
         />
       </section>
-      
+
       <section class="control-section">
-        <TempoControl
-          :model-value="tempo"
-          @update:model-value="handleTempoChange"
+        <TempoControl :model-value="tempo" @update:model-value="handleTempoChange" />
+      </section>
+
+      <section class="features-section">
+        <GapTraining
+          v-model:enabled="gapEnabled"
+          v-model:measures-with-click="measuresWithClick"
+          v-model:measures-without-click="measuresWithoutClick"
+        />
+        <Polyrhythm
+          v-model:enabled="polyrhythmEnabled"
+          v-model:left-hand-pattern="leftHandPattern"
+          v-model:right-hand-pattern="rightHandPattern"
         />
       </section>
-      
-      <section class="pattern-section">
-        <PatternInput
-          v-model="pattern"
-          @update:model-value="handlePatternChange"
-        />
+
+      <section v-if="!polyrhythmEnabled" class="pattern-section">
+        <PatternInput v-model="pattern" @update:model-value="handlePatternChange" />
       </section>
-      
-      <section class="presets-section">
+
+      <section v-if="!polyrhythmEnabled" class="presets-section">
         <PresetSelector @select="handlePresetSelect" />
       </section>
-      
+
       <section class="play-section">
         <button
           class="play-button"
@@ -92,7 +166,8 @@ const canPlay = computed(() => {
           {{ playButtonText }}
         </button>
         <p v-if="!canPlay" class="play-hint">
-          Enter a pattern to start
+          <span v-if="polyrhythmEnabled">Enter left or right hand pattern</span>
+          <span v-else>Enter a pattern to start</span>
         </p>
       </section>
     </main>
@@ -134,8 +209,14 @@ const canPlay = computed(() => {
 .control-section,
 .visualizer-section,
 .pattern-section,
-.presets-section {
+.presets-section,
+.features-section {
   width: 100%;
+}
+
+.features-section {
+  @include flex-column;
+  gap: $spacing-lg;
 }
 
 .play-section {
