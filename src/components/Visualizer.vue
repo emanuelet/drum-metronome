@@ -37,7 +37,7 @@ const containerStyle = computed(() => {
 
   return {
     '--beat-size': `${size}px`,
-    '--beat-font-size': `${size * 0.375}px`
+    '--beat-font-size': `${size * 0.375}px`,
   };
 });
 </script>

@@ -14,9 +14,12 @@ const localTempo = ref(props.modelValue);
 const { tap, reset, tapCount } = useTapTempo();
 const tapMessage = ref('');
 
-watch(() => props.modelValue, (newVal) => {
-  localTempo.value = newVal;
-});
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    localTempo.value = newVal;
+  }
+);
 
 watch(localTempo, (newVal) => {
   emit('update:modelValue', newVal);
@@ -67,7 +70,7 @@ const tempoMarks: TempoMark[] = [
   { name: 'Moderato', bpm: 115, description: 'Moderately' },
   { name: 'Allegro', bpm: 135, description: 'Fast' },
   { name: 'Presto', bpm: 180, description: 'Very fast' },
-  { name: 'Prestissimo', bpm: 220, description: 'Extremely fast' }
+  { name: 'Prestissimo', bpm: 220, description: 'Extremely fast' },
 ];
 
 const setTempoFromMark = (bpm: number) => {

@@ -13,33 +13,33 @@ const presets: Preset[] = [
   {
     name: 'Single Stroke',
     pattern: ['R', 'L', 'R', 'L'],
-    description: 'Alternating hands'
+    description: 'Alternating hands',
   },
   {
     name: 'Double Stroke',
     pattern: ['R', 'R', 'L', 'L'],
-    description: 'Two hits per hand'
+    description: 'Two hits per hand',
   },
   {
     name: 'Paradiddle',
     pattern: ['R', 'L', 'R', 'R', 'L', 'R', 'L', 'L'],
-    description: 'RLRR LRLL'
+    description: 'RLRR LRLL',
   },
   {
     name: 'Triplets',
     pattern: ['R', 'L', 'L'],
-    description: 'Right hand lead'
+    description: 'Right hand lead',
   },
   {
     name: 'Flam Accent',
     pattern: ['R!', 'L', 'R', 'L!', 'R', 'L'],
-    description: 'Accented flams'
+    description: 'Accented flams',
   },
   {
     name: 'Single Seven',
     pattern: ['R', 'L', 'R', 'L', 'R', 'L', 'L'],
-    description: '7-stroke roll'
-  }
+    description: '7-stroke roll',
+  },
 ];
 
 const selectPreset = (preset: Preset) => {

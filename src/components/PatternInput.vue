@@ -12,9 +12,13 @@ const emit = defineEmits<{
 const patternString = ref(props.modelValue.join(' '));
 const error = ref('');
 
-watch(() => props.modelValue, (newVal) => {
-  patternString.value = newVal.join(' ');
-}, { deep: true });
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    patternString.value = newVal.join(' ');
+  },
+  { deep: true }
+);
 
 const isValid = computed(() => {
   return error.value === '' && patternString.value.trim().length > 0;
@@ -27,7 +31,7 @@ const validatePattern = (input: string): boolean => {
     error.value = 'Pattern cannot be empty';
     return false;
   }
-  
+
   for (let i = 0; i < clean.length; i++) {
     const char = clean[i];
     if (char === '!') {
@@ -41,7 +45,7 @@ const validatePattern = (input: string): boolean => {
       return false;
     }
   }
-  
+
   error.value = '';
   return true;
 };
@@ -49,7 +53,7 @@ const validatePattern = (input: string): boolean => {
 const parsePattern = (input: string): string[] => {
   const clean = input.replace(/\s/g, '');
   const result: string[] = [];
-  
+
   for (let i = 0; i < clean.length; i++) {
     if (clean[i] === '!') {
       // Append to previous character
@@ -60,14 +64,14 @@ const parsePattern = (input: string): string[] => {
       result.push(clean[i]);
     }
   }
-  
+
   return result;
 };
 
 const handleInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value.toUpperCase();
   patternString.value = value;
-  
+
   if (validatePattern(value)) {
     const parsed = parsePattern(value);
     emit('update:modelValue', parsed);

@@ -9,15 +9,8 @@ import PresetSelector from './PresetSelector.vue';
 const pattern = ref<string[]>(['R', 'L', 'R', 'L']);
 const tempo = ref(120);
 
-const { 
-  isPlaying, 
-  currentBeat, 
-  start, 
-  stop, 
-  setTempo, 
-  setPattern,
-  initAudioContext 
-} = useMetronome();
+const { isPlaying, currentBeat, start, stop, setTempo, setPattern, initAudioContext } =
+  useMetronome();
 
 const togglePlay = () => {
   initAudioContext();
