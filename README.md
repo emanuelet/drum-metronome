@@ -4,6 +4,7 @@ A web-based metronome designed specifically for drummers with support for sticki
 
 **Live Demo:** https://drum-metronome.pages.dev
 
+![Screenshot](screenshot.png)
 ## Features
 
 - **Sticking Patterns** - Enter custom patterns using L (left), R (right), and ! (accent)
