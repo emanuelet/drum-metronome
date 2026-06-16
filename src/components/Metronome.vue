@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { Play, Square } from '@lucide/vue';
 import { useMetronome } from '../composables/useMetronome';
 import TempoControl from './TempoControl.vue';
 import PatternInput from './PatternInput.vue';
@@ -93,10 +94,6 @@ const handlePresetSelect = (presetPattern: string[]) => {
   setPattern(presetPattern);
 };
 
-const playButtonText = computed(() => {
-  return isPlaying.value ? 'STOP' : 'START';
-});
-
 const canPlay = computed(() => {
   if (polyrhythmEnabled.value) {
     return leftHandPattern.value.length > 0 || rightHandPattern.value.length > 0;
@@ -108,8 +105,20 @@ const canPlay = computed(() => {
 <template>
   <div class="metronome">
     <header class="metronome-header">
-      <h1 class="title">Drum Metronome</h1>
-      <p class="subtitle">Practice with sticking patterns</p>
+      <div class="title-group">
+        <h1 class="title">Drum Metronome</h1>
+        <p class="subtitle">Practice with sticking patterns</p>
+      </div>
+      <button
+        class="play-button"
+        :class="{ 'is-playing': isPlaying, 'is-disabled': !canPlay }"
+        @click="togglePlay"
+        :disabled="!canPlay"
+        :title="isPlaying ? 'Stop' : 'Start'"
+      >
+        <Play v-if="!isPlaying" :size="24" />
+        <Square v-else :size="24" />
+      </button>
     </header>
 
     <main class="metronome-main">
@@ -156,20 +165,10 @@ const canPlay = computed(() => {
         <PresetSelector @select="handlePresetSelect" />
       </section>
 
-      <section class="play-section">
-        <button
-          class="play-button"
-          :class="{ 'is-playing': isPlaying, 'is-disabled': !canPlay }"
-          @click="togglePlay"
-          :disabled="!canPlay"
-        >
-          {{ playButtonText }}
-        </button>
-        <p v-if="!canPlay" class="play-hint">
-          <span v-if="polyrhythmEnabled">Enter left or right hand pattern</span>
-          <span v-else>Enter a pattern to start</span>
-        </p>
-      </section>
+      <p v-if="!canPlay" class="play-hint">
+        <span v-if="polyrhythmEnabled">Enter left or right hand pattern</span>
+        <span v-else>Enter a pattern to start</span>
+      </p>
     </main>
   </div>
 </template>
@@ -184,7 +183,9 @@ const canPlay = computed(() => {
   min-height: 100vh;
 
   &-header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: $spacing-2xl;
   }
 
@@ -219,36 +220,28 @@ const canPlay = computed(() => {
   gap: $spacing-lg;
 }
 
-.play-section {
-  @include flex-column;
-  align-items: center;
-  gap: $spacing-md;
-  margin-top: $spacing-lg;
-}
-
 .play-button {
-  width: 100%;
-  max-width: 300px;
-  padding: 1.25rem 3rem;
-  font-size: $font-3xl;
-  font-weight: 700;
-  background: $accent-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: $beat-active;
   color: white;
   border: none;
-  border-radius: $radius-lg;
+  border-radius: 50%;
   cursor: pointer;
   transition: all $transition-base;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  flex-shrink: 0;
 
   &:hover:not(.is-disabled) {
-    background: $accent-secondary;
-    transform: translateY(-2px);
+    transform: scale(1.1);
     box-shadow: $shadow-lg;
   }
 
   &:active:not(.is-disabled) {
-    transform: translateY(0);
+    transform: scale(1);
   }
 
   &.is-playing {
@@ -267,8 +260,10 @@ const canPlay = computed(() => {
 }
 
 .play-hint {
+  text-align: center;
   color: $text-muted;
   font-size: $font-base;
+  margin-top: -$spacing-lg;
 }
 
 @media (min-width: $breakpoint-md) {
