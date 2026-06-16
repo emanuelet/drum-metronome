@@ -88,16 +88,23 @@ const getSliderPosition = (bpm: number): string => {
 
 <template>
   <div class="tempo-control">
-    <div class="tempo-display">
-      <input
-        type="number"
-        class="tempo-input"
-        :value="localTempo"
-        @change="handleInputChange"
-        min="20"
-        max="300"
-      />
-      <span class="tempo-label">BPM</span>
+    <div class="tempo-top-row">
+      <div class="tempo-display">
+        <input
+          type="number"
+          class="tempo-input"
+          :value="localTempo"
+          @change="handleInputChange"
+          min="20"
+          max="300"
+        />
+        <span class="tempo-label">BPM</span>
+      </div>
+
+      <button class="tap-button" @click="handleTap">
+        TAP TEMPO
+        <span v-if="tapMessage" class="tap-message">{{ tapMessage }}</span>
+      </button>
     </div>
 
     <div class="slider-container">
@@ -131,10 +138,6 @@ const getSliderPosition = (bpm: number): string => {
       <span>300</span>
     </div>
 
-    <button class="tap-button" @click="handleTap">
-      TAP TEMPO
-      <span v-if="tapMessage" class="tap-message">{{ tapMessage }}</span>
-    </button>
   </div>
 </template>
 
@@ -146,6 +149,13 @@ const getSliderPosition = (bpm: number): string => {
   gap: $spacing-lg;
   padding: $spacing-xl;
   @include card;
+}
+
+.tempo-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-lg;
 }
 
 .tempo-display {

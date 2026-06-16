@@ -189,7 +189,7 @@ const clearPattern = () => {
 }
 
 .pattern-help {
-  font-size: $font-base;
+  font-size: $font-lg;
   color: $text-secondary;
 
   strong {

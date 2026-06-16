@@ -144,6 +144,14 @@ const canPlay = computed(() => {
         <TempoControl :model-value="tempo" @update:model-value="handleTempoChange" />
       </section>
 
+      <section v-if="!polyrhythmEnabled" class="pattern-section">
+        <PatternInput v-model="pattern" @update:model-value="handlePatternChange" />
+      </section>
+
+      <section v-if="!polyrhythmEnabled" class="presets-section">
+        <PresetSelector @select="handlePresetSelect" />
+      </section>
+
       <section class="features-section">
         <GapTraining
           v-model:enabled="gapEnabled"
@@ -155,14 +163,6 @@ const canPlay = computed(() => {
           v-model:left-hand-pattern="leftHandPattern"
           v-model:right-hand-pattern="rightHandPattern"
         />
-      </section>
-
-      <section v-if="!polyrhythmEnabled" class="pattern-section">
-        <PatternInput v-model="pattern" @update:model-value="handlePatternChange" />
-      </section>
-
-      <section v-if="!polyrhythmEnabled" class="presets-section">
-        <PresetSelector @select="handlePresetSelect" />
       </section>
 
       <p v-if="!canPlay" class="play-hint">
