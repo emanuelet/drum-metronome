@@ -11,14 +11,14 @@
     "check": "biome check ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.9",
-    "@vitejs/plugin-vue": "^6.0.5",
+    "@biomejs/biome": "^2.5.0",
+    "@vitejs/plugin-vue": "^6.0.7",
     "sass": "^1.98.0",
     "typescript": "~5.9.3",
-    "vite": "^8.0.1",
-    "vue-tsc": "^3.2.6"
+    "vite": "^8.0.16",
+    "vue-tsc": "^3.3.5"
   },
   "dependencies": {
-    "vue": "^3.5.31"
+    "vue": "^3.5.38"
   }
 }
