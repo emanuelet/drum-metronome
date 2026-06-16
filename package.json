@@ -7,7 +7,7 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "format": "biome format --write .",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler pages deploy",
     "lint": "biome lint .",
     "check": "biome check ."
   },
