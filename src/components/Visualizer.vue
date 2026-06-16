@@ -238,8 +238,7 @@ const gapProgress = computed(() => {
 .visualizer-container {
   @include flex-center;
   gap: $spacing-md;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
   min-height: 120px;
   padding: $spacing-sm;
 }
