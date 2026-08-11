@@ -1,4 +1,4 @@
-import { ref, computed, onUnmounted } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 
 export function useMetronome() {
   const audioContext = ref<AudioContext | null>(null);

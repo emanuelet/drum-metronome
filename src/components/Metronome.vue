@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
 import { Play, Square } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
 import { useMetronome } from '../composables/useMetronome';
-import TempoControl from './TempoControl.vue';
-import PatternInput from './PatternInput.vue';
-import Visualizer from './Visualizer.vue';
-import PresetSelector from './PresetSelector.vue';
 import GapTraining from './GapTraining.vue';
+import PatternInput from './PatternInput.vue';
 import Polyrhythm from './Polyrhythm.vue';
+import PresetSelector from './PresetSelector.vue';
+import TempoControl from './TempoControl.vue';
+import Visualizer from './Visualizer.vue';
 
 const pattern = ref<string[]>(['R', 'L', 'R', 'L']);
 const tempo = ref(120);
