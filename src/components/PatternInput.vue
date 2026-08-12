@@ -1,64 +1,60 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
   modelValue: string[];
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [value: string[]];
+  'update:modelValue': [value: string[]];
 }>();
 
-const patternString = ref(props.modelValue.join(" "));
-const error = ref("");
+const patternString = ref(props.modelValue.join(' '));
+const error = ref('');
 
 watch(
   () => props.modelValue,
   (newVal) => {
-    patternString.value = newVal.join(" ");
+    patternString.value = newVal.join(' ');
   },
-  { deep: true },
+  { deep: true }
 );
-
-const isValid = computed(() => {
-  return error.value === "" && patternString.value.trim().length > 0;
-});
 
 const validatePattern = (input: string): boolean => {
   // Remove spaces and check each character
-  const clean = input.replace(/\s/g, "");
+  const clean = input.replace(/\s/g, '');
   if (clean.length === 0) {
-    error.value = "Pattern cannot be empty";
+    error.value = 'Pattern cannot be empty';
     return false;
   }
 
   for (let i = 0; i < clean.length; i++) {
     const char = clean[i];
-    if (char === "!") {
+    if (char === '!') {
       // Check if ! is preceded by L or R
-      if (i === 0 || (clean[i - 1] !== "L" && clean[i - 1] !== "R")) {
-        error.value = "Accent (!) must follow L or R";
+      if (i === 0 || (clean[i - 1] !== 'L' && clean[i - 1] !== 'R')) {
+        error.value = 'Accent (!) must follow L or R';
         return false;
       }
-    } else if (char !== "L" && char !== "R") {
-      error.value = "Pattern can only contain L, R, and !";
+    } else if (char !== 'L' && char !== 'R') {
+      error.value = 'Pattern can only contain L, R, and !';
       return false;
     }
   }
 
-  error.value = "";
+  error.value = '';
   return true;
 };
 
 const parsePattern = (input: string): string[] => {
-  const clean = input.replace(/\s/g, "");
+  const clean = input.replace(/\s/g, '');
   const result: string[] = [];
 
   for (let i = 0; i < clean.length; i++) {
-    if (clean[i] === "!") {
+    if (clean[i] === '!') {
       // Append to previous character
       if (result.length > 0) {
-        result[result.length - 1] += "!";
+        result[result.length - 1] += '!';
       }
     } else {
       result.push(clean[i]);
@@ -74,14 +70,14 @@ const handleInput = (e: Event) => {
 
   if (validatePattern(value)) {
     const parsed = parsePattern(value);
-    emit("update:modelValue", parsed);
+    emit('update:modelValue', parsed);
   }
 };
 
 const clearPattern = () => {
-  patternString.value = "";
-  error.value = "";
-  emit("update:modelValue", []);
+  patternString.value = '';
+  error.value = '';
+  emit('update:modelValue', []);
 };
 </script>
 

@@ -153,18 +153,23 @@ const getSliderPosition = (bpm: number): string => {
     </div>
 
     <div class="rhythm-settings">
-      <label>
-        Clicks per beat
-        <select
+      <div class="clicks-control">
+        <div class="clicks-header">
+          <label for="clicks-per-beat">Clicks per beat</label>
+          <output for="clicks-per-beat">{{ clicksPerBeat }}</output>
+        </div>
+        <input
+          id="clicks-per-beat"
+          type="range"
+          class="subdivision-slider"
           :value="clicksPerBeat"
-          @change="emit('update:clicksPerBeat', Number(($event.target as HTMLSelectElement).value))"
-        >
-          <option v-for="clicks in 16" :key="clicks" :value="clicks">
-            {{ clicks }}
-          </option>
-        </select>
-      </label>
-
+          min="1"
+          max="16"
+          step="1"
+          @input="emit('update:clicksPerBeat', Number(($event.target as HTMLInputElement).value))"
+        />
+        <div class="clicks-range"><span>1</span><span>16</span></div>
+      </div>
     </div>
   </div>
 </template>
@@ -346,30 +351,70 @@ const getSliderPosition = (bpm: number): string => {
 }
 
 .rhythm-settings {
+  width: 100%;
+}
+
+.clicks-control {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.clicks-header,
+.clicks-range {
   display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-lg;
+  justify-content: space-between;
+}
 
-  label {
+.clicks-header {
+  align-items: center;
+  color: $text-secondary;
+  font-size: $font-base;
+  font-weight: 600;
+
+  output {
     display: grid;
-    gap: $spacing-xs;
-    color: $text-secondary;
-    font-size: $font-base;
-    font-weight: 600;
+    width: 2rem;
+    height: 2rem;
+    color: white;
+    font-size: $font-lg;
+    background: $accent-primary;
+    border-radius: 50%;
+    place-items: center;
   }
+}
 
-  select {
-    min-width: 8rem;
-    padding: $spacing-sm;
-    color: $text-primary;
-    background: $bg-secondary;
-    border: 1px solid $border-color;
-    border-radius: $radius-sm;
+.subdivision-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: $bg-tertiary;
+  border-radius: $radius-sm;
+  cursor: pointer;
 
-    &:focus {
-      @include input-focus;
+  &::-webkit-slider-thumb {
+    @include slider-thumb;
+
+    &:hover {
+      transform: scale(1.1);
+      background: $accent-secondary;
     }
   }
+
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: $accent-primary;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+}
+
+.clicks-range {
+  margin-top: -$spacing-xs;
+  color: $text-muted;
+  font-size: $font-base;
 }
 
 .tap-button {

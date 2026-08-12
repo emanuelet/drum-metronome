@@ -40,6 +40,16 @@ const presets: Preset[] = [
     pattern: ['R', 'L', 'R', 'L', 'R', 'L', 'L'],
     description: '7-stroke roll',
   },
+  {
+    name: 'Six Stroke Roll',
+    pattern: ['R', 'L', 'L', 'R', 'R', 'L'],
+    description: 'RLL RRL',
+  },
+  {
+    name: 'Inverted Paradiddle',
+    pattern: ['R', 'L', 'L', 'R', 'L', 'R', 'R', 'L'],
+    description: 'RLLR LRRL',
+  },
 ];
 
 const selectPreset = (preset: Preset) => {
