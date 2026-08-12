@@ -107,9 +107,9 @@ const clearPattern = () => {
     </div>
     
     <div class="pattern-help">
-      <span class="help-text">
-        <strong>L</strong> = Left, <strong>R</strong> = Right, <strong>!</strong> = Accent
-      </span>
+      <span class="help-key left">L</span> Left
+      <span class="help-key right">R</span> Right
+      <span class="help-key accent">!</span> Accent
     </div>
     
     <div class="pattern-preview" v-if="isValid && modelValue.length > 0">
@@ -189,11 +189,37 @@ const clearPattern = () => {
 }
 
 .pattern-help {
-  font-size: $font-lg;
-  color: $text-secondary;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  align-items: center;
+  padding: $spacing-md;
+  color: $text-primary;
+  font-size: $font-xl;
+  font-weight: 600;
+  background: $bg-tertiary;
+  border-radius: $radius-md;
+}
 
-  strong {
-    color: $text-primary;
+.help-key {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: white;
+  font-size: $font-lg;
+  border-radius: 50%;
+  place-items: center;
+
+  &.left {
+    background: $beat-left;
+  }
+
+  &.right {
+    background: $beat-right;
+  }
+
+  &.accent {
+    background: $beat-accent;
   }
 }
 

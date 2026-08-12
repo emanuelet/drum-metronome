@@ -3,13 +3,16 @@ import { computed, onUnmounted, ref } from 'vue';
 export function useMetronome() {
   const audioContext = ref<AudioContext | null>(null);
   const isPlaying = ref(false);
+  const isPaused = ref(false);
   const beatCounter = ref(0);
+  const subdivisionCounter = ref(0);
   const nextNoteTime = ref(0);
   const timerID = ref<number | null>(null);
   const lookahead = 25.0;
   const scheduleAheadTime = 0.1;
 
   const tempo = ref(120);
+  const subdivisions = ref(1);
   const pattern = ref<string[]>([]);
 
   // Gap Training feature
@@ -40,25 +43,29 @@ export function useMetronome() {
     }
   };
 
-  const createClickSound = (frequency: number, volume: number, duration: number) => {
+  const createClickSound = (isAccent: boolean, startTime: number) => {
     if (!audioContext.value) return;
 
     const oscillator = audioContext.value.createOscillator();
     const gainNode = audioContext.value.createGain();
+    const duration = isAccent ? 0.09 : 0.055;
+    const startFrequency = isAccent ? 1800 : 1100;
+    const endFrequency = isAccent ? 650 : 350;
+    const volume = isAccent ? 0.32 : 0.22;
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.value.destination);
 
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
+    oscillator.type = isAccent ? 'sine' : 'triangle';
+    oscillator.frequency.setValueAtTime(startFrequency, startTime);
+    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startTime + duration);
 
-    const now = audioContext.value.currentTime;
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(volume, now + 0.005);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.005);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-    oscillator.start(now);
-    oscillator.stop(now + duration);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
   };
 
   const playBeat = (beatType: string) => {
@@ -67,19 +74,13 @@ export function useMetronome() {
     // Don't play if in gap mode
     if (gapTrainingEnabled.value && isInGap.value) return;
 
-    // Soft click sounds
+    const isAccent = beatType.includes('!');
     switch (beatType) {
       case 'L':
-        createClickSound(800, 0.5, 0.05);
-        break;
       case 'R':
-        createClickSound(800, 0.5, 0.05);
-        break;
       case 'L!':
-        createClickSound(1200, 0.8, 0.08);
-        break;
       case 'R!':
-        createClickSound(1200, 0.8, 0.08);
+        createClickSound(isAccent, nextNoteTime.value);
         break;
     }
   };
@@ -92,8 +93,7 @@ export function useMetronome() {
     if (leftHandPattern.value.length > 0) {
       const leftBeat = leftHandPattern.value[leftHandBeat.value % leftHandPattern.value.length];
       if (leftBeat.includes('L')) {
-        const isAccent = leftBeat.includes('!');
-        createClickSound(isAccent ? 1000 : 700, isAccent ? 0.6 : 0.4, 0.05);
+        createClickSound(leftBeat.includes('!'), nextNoteTime.value);
       }
     }
 
@@ -101,8 +101,7 @@ export function useMetronome() {
     if (rightHandPattern.value.length > 0) {
       const rightBeat = rightHandPattern.value[rightHandBeat.value % rightHandPattern.value.length];
       if (rightBeat.includes('R')) {
-        const isAccent = rightBeat.includes('!');
-        createClickSound(isAccent ? 1300 : 900, isAccent ? 0.6 : 0.4, 0.05);
+        createClickSound(rightBeat.includes('!'), nextNoteTime.value);
       }
     }
   };
@@ -125,36 +124,40 @@ export function useMetronome() {
       if (polyrhythmEnabled.value) {
         // Polyrhythm mode - play both hands
         playPolyrhythmBeats();
-
-        // Update beat counters for polyrhythm
-        leftHandBeat.value++;
-        rightHandBeat.value++;
-
-        // Update measure counter for gap training
-        if (leftHandPattern.value.length > 0) {
-          const beatsPerMeasure = leftHandPattern.value.length;
-          if (leftHandBeat.value % beatsPerMeasure === 0) {
-            currentMeasure.value++;
-            updateGapStatus();
-          }
-        }
       } else {
         // Standard mode - play single pattern
         if (pattern.value.length > 0) {
           const beatType = pattern.value[beatCounter.value % pattern.value.length];
           playBeat(beatType);
+        }
+      }
 
-          // Update measure counter for gap training
-          if (beatCounter.value % pattern.value.length === 0 && beatCounter.value > 0) {
+      subdivisionCounter.value++;
+      if (subdivisionCounter.value === subdivisions.value) {
+        subdivisionCounter.value = 0;
+
+        if (polyrhythmEnabled.value) {
+          leftHandBeat.value++;
+          rightHandBeat.value++;
+
+          if (
+            leftHandPattern.value.length > 0 &&
+            leftHandBeat.value % leftHandPattern.value.length === 0
+          ) {
+            currentMeasure.value++;
+            updateGapStatus();
+          }
+        } else {
+          beatCounter.value++;
+
+          if (pattern.value.length > 0 && beatCounter.value % pattern.value.length === 0) {
             currentMeasure.value++;
             updateGapStatus();
           }
         }
       }
 
-      const secondsPerBeat = 60.0 / tempo.value;
-      nextNoteTime.value += secondsPerBeat;
-      beatCounter.value++;
+      nextNoteTime.value += 60.0 / tempo.value / subdivisions.value;
     }
 
     timerID.value = window.setTimeout(scheduler, lookahead);
@@ -165,7 +168,9 @@ export function useMetronome() {
 
     initAudioContext();
     isPlaying.value = true;
+    isPaused.value = false;
     beatCounter.value = 0;
+    subdivisionCounter.value = 0;
     leftHandBeat.value = 0;
     rightHandBeat.value = 0;
     currentMeasure.value = 0;
@@ -174,13 +179,35 @@ export function useMetronome() {
     scheduler();
   };
 
-  const stop = () => {
-    isPlaying.value = false;
+  const clearScheduler = () => {
     if (timerID.value) {
       clearTimeout(timerID.value);
       timerID.value = null;
     }
+  };
+
+  const pause = () => {
+    isPlaying.value = false;
+    isPaused.value = true;
+    clearScheduler();
+  };
+
+  const resume = () => {
+    if (!isPaused.value) return;
+
+    initAudioContext();
+    isPlaying.value = true;
+    isPaused.value = false;
+    nextNoteTime.value = audioContext.value!.currentTime;
+    scheduler();
+  };
+
+  const stop = () => {
+    isPlaying.value = false;
+    isPaused.value = false;
+    clearScheduler();
     beatCounter.value = 0;
+    subdivisionCounter.value = 0;
     leftHandBeat.value = 0;
     rightHandBeat.value = 0;
     currentMeasure.value = 0;
@@ -189,6 +216,11 @@ export function useMetronome() {
 
   const setTempo = (newTempo: number) => {
     tempo.value = Math.max(20, Math.min(300, newTempo));
+  };
+
+  const setSubdivisions = (newSubdivisions: number) => {
+    subdivisions.value = Math.max(1, Math.min(16, Math.round(newSubdivisions)));
+    subdivisionCounter.value = 0;
   };
 
   const setPattern = (newPattern: string[]) => {
@@ -235,8 +267,10 @@ export function useMetronome() {
 
   return {
     isPlaying,
+    isPaused,
     currentBeat,
     tempo,
+    subdivisions,
     pattern,
     // Gap training
     gapTrainingEnabled,
@@ -252,8 +286,11 @@ export function useMetronome() {
     rightHandBeat,
     // Methods
     start,
+    pause,
+    resume,
     stop,
     setTempo,
+    setSubdivisions,
     setPattern,
     initAudioContext,
     toggleGapTraining,

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
   pattern: string[];
+  beatsPerRow?: number;
   currentBeat: number;
   isPlaying: boolean;
   // Gap training props
@@ -17,6 +18,10 @@ const props = defineProps<{
   rightHandPattern?: string[];
   leftHandBeat?: number;
   rightHandBeat?: number;
+}>();
+
+const emit = defineEmits<{
+  'update:beatsPerRow': [value: number];
 }>();
 
 const getBeatClass = (beat: string): string => {
@@ -93,7 +98,12 @@ const gapProgress = computed(() => {
     </div>
 
     <!-- Standard Pattern Visualizer -->
-    <div v-if="!polyrhythmEnabled" class="visualizer-container" :style="containerStyle">
+    <div
+      v-if="!polyrhythmEnabled"
+      class="visualizer-container"
+      :class="{ 'is-multiline': pattern.length > (beatsPerRow || 4) }"
+      :style="{ ...containerStyle, '--beats-per-row': beatsPerRow || 4 }"
+    >
       <div
         v-for="(beat, index) in pattern"
         :key="index"
@@ -111,6 +121,21 @@ const gapProgress = computed(() => {
       </div>
       <div v-if="pattern.length === 0" class="empty-pattern">
         Enter a pattern to see visualization
+      </div>
+    </div>
+
+    <div v-if="!polyrhythmEnabled && pattern.length > 3" class="beats-per-row-control">
+      <span>Beats per row</span>
+      <div role="group" aria-label="Beats per row">
+        <button
+          v-for="rowLength in [2, 4, 6, 8]"
+          :key="rowLength"
+          type="button"
+          :class="{ 'is-active': (beatsPerRow || 4) === rowLength }"
+          @click="emit('update:beatsPerRow', rowLength)"
+        >
+          {{ rowLength }}
+        </button>
       </div>
     </div>
 
@@ -167,10 +192,58 @@ const gapProgress = computed(() => {
 .visualizer {
   padding: $spacing-2xl;
   @include card;
+  position: relative;
   transition: background-color $transition-base;
 
   &.is-in-gap {
     background: rgba($bg-secondary, 0.5);
+  }
+}
+
+.beats-per-row-control {
+  position: absolute;
+  top: 50%;
+  right: $spacing-md;
+  display: grid;
+  gap: $spacing-xs;
+  transform: translateY(-50%);
+
+  > span {
+    color: $text-muted;
+    font-size: $font-xs;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    justify-self: center;
+  }
+
+  > div {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+  }
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    color: $text-secondary;
+    font-weight: 700;
+    background: $bg-tertiary;
+    border: 0;
+    border-bottom: 1px solid $border-color;
+    cursor: pointer;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover,
+    &.is-active {
+      color: white;
+      background: $accent-primary;
+    }
   }
 }
 
@@ -241,6 +314,12 @@ const gapProgress = computed(() => {
   flex-wrap: wrap;
   min-height: 120px;
   padding: $spacing-sm;
+
+  &.is-multiline {
+    display: grid;
+    grid-template-columns: repeat(var(--beats-per-row), var(--beat-size, 64px));
+    justify-content: center;
+  }
 }
 
 .beat-indicator {
@@ -351,6 +430,15 @@ const gapProgress = computed(() => {
   .visualizer-container {
     gap: $spacing-sm;
     min-height: 80px;
+  }
+
+  .beats-per-row-control {
+    right: $spacing-xs;
+
+    button {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
   }
 
   .beat-indicator.small {

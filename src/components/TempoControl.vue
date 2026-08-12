@@ -4,10 +4,12 @@ import { useTapTempo } from '../composables/useTapTempo';
 
 const props = defineProps<{
   modelValue: number;
+  clicksPerBeat: number;
 }>();
 
 const emit = defineEmits<{
   'update:modelValue': [value: number];
+  'update:clicksPerBeat': [value: number];
 }>();
 
 const localTempo = ref(props.modelValue);
@@ -56,6 +58,11 @@ const handleInputChange = (e: Event) => {
   }
 };
 
+const adjustTempo = (amount: number) => {
+  localTempo.value = Math.max(20, Math.min(300, localTempo.value + amount));
+  reset();
+};
+
 // Italian tempo markings
 interface TempoMark {
   name: string;
@@ -90,6 +97,10 @@ const getSliderPosition = (bpm: number): string => {
   <div class="tempo-control">
     <div class="tempo-top-row">
       <div class="tempo-display">
+        <div class="tempo-step-buttons">
+          <button type="button" @click="adjustTempo(-5)" title="Decrease by 5 BPM">-5</button>
+          <button type="button" @click="adjustTempo(-1)" title="Decrease by 1 BPM">-1</button>
+        </div>
         <input
           type="number"
           class="tempo-input"
@@ -98,7 +109,10 @@ const getSliderPosition = (bpm: number): string => {
           min="20"
           max="300"
         />
-        <span class="tempo-label">BPM</span>
+        <div class="tempo-step-buttons">
+          <button type="button" @click="adjustTempo(1)" title="Increase by 1 BPM">+1</button>
+          <button type="button" @click="adjustTempo(5)" title="Increase by 5 BPM">+5</button>
+        </div>
       </div>
 
       <button class="tap-button" @click="handleTap">
@@ -138,6 +152,20 @@ const getSliderPosition = (bpm: number): string => {
       <span>300</span>
     </div>
 
+    <div class="rhythm-settings">
+      <label>
+        Clicks per beat
+        <select
+          :value="clicksPerBeat"
+          @change="emit('update:clicksPerBeat', Number(($event.target as HTMLSelectElement).value))"
+        >
+          <option v-for="clicks in 16" :key="clicks" :value="clicks">
+            {{ clicks }}
+          </option>
+        </select>
+      </label>
+
+    </div>
   </div>
 </template>
 
@@ -159,14 +187,46 @@ const getSliderPosition = (bpm: number): string => {
 }
 
 .tempo-display {
+  --tempo-control-size: clamp(2.75rem, 14vw, 4rem);
+
   @include flex-center;
   gap: $spacing-sm;
 }
 
+.tempo-step-buttons {
+  display: flex;
+  gap: $spacing-xs;
+
+  button {
+    width: var(--tempo-control-size);
+    height: var(--tempo-control-size);
+    padding: 0;
+    color: $text-primary;
+    font-size: $font-xl;
+    font-weight: 700;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: background $transition-base, transform $transition-fast;
+
+    &:hover {
+      background: $accent-primary;
+      color: white;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
 .tempo-input {
-  font-size: $font-6xl;
+  width: calc(var(--tempo-control-size) * 2);
+  height: var(--tempo-control-size);
+  padding: 0;
+  font-size: clamp(2rem, 7vw, $font-6xl);
   font-weight: 700;
-  width: 120px;
   text-align: center;
   background: transparent;
   border: 2px solid $border-color;
@@ -177,11 +237,6 @@ const getSliderPosition = (bpm: number): string => {
   &:focus {
     @include input-focus;
   }
-}
-
-.tempo-label {
-  font-size: $font-xl;
-  color: $text-secondary;
 }
 
 .slider-container {
@@ -284,9 +339,37 @@ const getSliderPosition = (bpm: number): string => {
 .tempo-range {
   display: flex;
   justify-content: space-between;
-  font-size: $font-base;
+  font-size: $font-2xl;
+  font-weight: 600;
   color: $text-muted;
   margin-top: -$spacing-lg;
+}
+
+.rhythm-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-lg;
+
+  label {
+    display: grid;
+    gap: $spacing-xs;
+    color: $text-secondary;
+    font-size: $font-base;
+    font-weight: 600;
+  }
+
+  select {
+    min-width: 8rem;
+    padding: $spacing-sm;
+    color: $text-primary;
+    background: $bg-secondary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+
+    &:focus {
+      @include input-focus;
+    }
+  }
 }
 
 .tap-button {
