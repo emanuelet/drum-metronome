@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { stickingColorPresets } from '../composables/useStickingSettings';
+import { stickingColorPresets } from "../composables/useStickingSettings";
 
 defineProps<{
   presetId: string;
 }>();
 
 const emit = defineEmits<{
-  'update:presetId': [value: string];
+  "update:presetId": [value: string];
 }>();
 </script>
 
@@ -16,15 +16,24 @@ const emit = defineEmits<{
       Sticking colors
       <select
         :value="presetId"
-        @change="emit('update:presetId', ($event.target as HTMLSelectElement).value)"
+        @change="
+          emit('update:presetId', ($event.target as HTMLSelectElement).value)
+        "
       >
-        <option v-for="preset in stickingColorPresets" :key="preset.id" :value="preset.id">
+        <option
+          v-for="preset in stickingColorPresets"
+          :key="preset.id"
+          :value="preset.id"
+        >
           {{ preset.name }}
         </option>
       </select>
     </label>
 
-    <div class="color-preview" aria-label="Left, right, accent, and active sticking colors">
+    <div
+      class="color-preview"
+      aria-label="Left, right, accent, and active sticking colors"
+    >
       <span class="left" title="Left"></span>
       <span class="right" title="Right"></span>
       <span class="accent" title="Accent"></span>
@@ -34,7 +43,7 @@ const emit = defineEmits<{
 </template>
 
 <style scoped lang="scss">
-@use '../styles/variables' as *;
+@use "../styles/variables" as *;
 
 .sticking-settings {
   display: flex;
@@ -68,12 +77,12 @@ const emit = defineEmits<{
 
   .color-preview {
     display: flex;
-    gap: $spacing-xs;
+    gap: $spacing-sm;
     padding-bottom: $spacing-xs;
 
     span {
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 1.5rem;
+      height: 1.5rem;
       border: 2px solid $bg-secondary;
       border-radius: 50%;
       box-shadow: 0 0 0 1px $border-color;

@@ -81,7 +81,7 @@ const gapProgress = computed(() => {
     <!-- Gap Mode Indicator -->
     <div v-if="gapEnabled && gapProgress" class="gap-indicator">
       <div class="gap-status" :class="{ 'in-gap': isInGap }">
-        {{ isInGap ? '🔇 GAP MODE' : '🔊 PLAYING' }}
+        {{ isInGap ? "🔇 GAP MODE" : "🔊 PLAYING" }}
       </div>
       <div class="gap-progress-bar">
         <div
@@ -91,7 +91,7 @@ const gapProgress = computed(() => {
           :class="{
             'is-past': i - 1 < gapProgress.current,
             'is-current': i - 1 === gapProgress.current,
-            'is-gap': i > gapProgress.withClick
+            'is-gap': i > gapProgress.withClick,
           }"
         />
       </div>
@@ -113,8 +113,8 @@ const gapProgress = computed(() => {
           {
             'is-active': isPlaying && currentBeat === index,
             'is-playing': isPlaying,
-            'is-muted': isInGap
-          }
+            'is-muted': isInGap,
+          },
         ]"
       >
         <span class="beat-label">{{ getBeatLabel(beat) }}</span>
@@ -124,13 +124,16 @@ const gapProgress = computed(() => {
       </div>
     </div>
 
-    <div v-if="!polyrhythmEnabled && pattern.length > 3" class="beats-per-row-control">
-      <span>Beats per row</span>
+    <div
+      v-if="!polyrhythmEnabled && pattern.length > 3"
+      class="beats-per-row-control"
+    >
       <div role="group" aria-label="Beats per row">
         <button
           v-for="rowLength in [2, 4, 6, 8]"
           :key="rowLength"
           type="button"
+          :title="`Set beats per row to ${rowLength}`"
           :class="{ 'is-active': (beatsPerRow || 4) === rowLength }"
           @click="emit('update:beatsPerRow', rowLength)"
         >
@@ -140,7 +143,7 @@ const gapProgress = computed(() => {
     </div>
 
     <!-- Polyrhythm Visualizer -->
-    <div v-else class="polyrhythm-visualizer">
+    <div v-if="polyrhythmEnabled" class="polyrhythm-visualizer">
       <div class="hand-pattern">
         <label class="hand-label">Left Hand</label>
         <div class="hand-beats">
@@ -151,17 +154,20 @@ const gapProgress = computed(() => {
             :class="[
               getBeatClass(beat),
               {
-                'is-active': isPlaying && (leftHandBeat || 0) % (leftHandPattern?.length || 1) === index,
+                'is-active':
+                  isPlaying &&
+                  (leftHandBeat || 0) % (leftHandPattern?.length || 1) ===
+                    index,
                 'is-playing': isPlaying,
-                'is-muted': isInGap
-              }
+                'is-muted': isInGap,
+              },
             ]"
           >
             <span class="beat-label">{{ getBeatLabel(beat) }}</span>
           </div>
         </div>
       </div>
-      
+
       <div class="hand-pattern">
         <label class="hand-label">Right Hand</label>
         <div class="hand-beats">
@@ -172,10 +178,13 @@ const gapProgress = computed(() => {
             :class="[
               getBeatClass(beat),
               {
-                'is-active': isPlaying && (rightHandBeat || 0) % (rightHandPattern?.length || 1) === index,
+                'is-active':
+                  isPlaying &&
+                  (rightHandBeat || 0) % (rightHandPattern?.length || 1) ===
+                    index,
                 'is-playing': isPlaying,
-                'is-muted': isInGap
-              }
+                'is-muted': isInGap,
+              },
             ]"
           >
             <span class="beat-label">{{ getBeatLabel(beat) }}</span>
@@ -187,7 +196,7 @@ const gapProgress = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@use '../styles/variables' as *;
+@use "../styles/variables" as *;
 
 .visualizer {
   padding: $spacing-2xl;
@@ -336,7 +345,7 @@ const gapProgress = computed(() => {
   flex-shrink: 0;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -4px;
     border-radius: 50%;
@@ -374,7 +383,9 @@ const gapProgress = computed(() => {
 
     &.accent {
       transform: scale(1.3);
-      box-shadow: 0 0 30px $beat-accent, 0 0 45px $beat-active;
+      box-shadow:
+        0 0 30px $beat-accent,
+        0 0 45px $beat-active;
     }
   }
 

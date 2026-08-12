@@ -22,32 +22,32 @@ export const stickingColorPresets: StickingColorPreset[] = [
     id: 'ocean',
     name: 'Ocean',
     colors: {
-      light: { left: '#1971c2', right: '#f08c00', accent: '#7048e8', active: '#099268' },
-      dark: { left: '#4dabf7', right: '#ffd43b', accent: '#b197fc', active: '#38d9a9' },
+      light: { left: '#1971c2', right: '#f08c00', accent: '#0c8599', active: '#099268' },
+      dark: { left: '#4dabf7', right: '#ffd43b', accent: '#3bc9db', active: '#38d9a9' },
     },
   },
   {
     id: 'sunset',
     name: 'Sunset',
     colors: {
-      light: { left: '#e64980', right: '#f76707', accent: '#6741d9', active: '#2f9e44' },
-      dark: { left: '#faa2c1', right: '#ffa94d', accent: '#b197fc', active: '#69db7c' },
+      light: { left: '#e64980', right: '#f76707', accent: '#f59f00', active: '#2f9e44' },
+      dark: { left: '#faa2c1', right: '#ffa94d', accent: '#ffd43b', active: '#69db7c' },
     },
   },
   {
     id: 'forest',
     name: 'Forest',
     colors: {
-      light: { left: '#2b8a3e', right: '#c92a2a', accent: '#5f3dc4', active: '#0ca678' },
-      dark: { left: '#69db7c', right: '#ff8787', accent: '#b197fc', active: '#63e6be' },
+      light: { left: '#2b8a3e', right: '#c92a2a', accent: '#e67700', active: '#0ca678' },
+      dark: { left: '#69db7c', right: '#ff8787', accent: '#fcc419', active: '#63e6be' },
     },
   },
   {
     id: 'neon',
     name: 'Neon',
     colors: {
-      light: { left: '#0b7285', right: '#d6336c', accent: '#7048e8', active: '#37b24d' },
-      dark: { left: '#22b8cf', right: '#f783ac', accent: '#9775fa', active: '#51cf66' },
+      light: { left: '#0b7285', right: '#d6336c', accent: '#ae3ec9', active: '#37b24d' },
+      dark: { left: '#22b8cf', right: '#f783ac', accent: '#e599f7', active: '#51cf66' },
     },
   },
 ];

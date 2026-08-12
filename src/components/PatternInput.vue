@@ -1,64 +1,64 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   modelValue: string[];
 }>();
 
 const emit = defineEmits<{
-  'update:modelValue': [value: string[]];
+  "update:modelValue": [value: string[]];
 }>();
 
-const patternString = ref(props.modelValue.join(' '));
-const error = ref('');
+const patternString = ref(props.modelValue.join(" "));
+const error = ref("");
 
 watch(
   () => props.modelValue,
   (newVal) => {
-    patternString.value = newVal.join(' ');
+    patternString.value = newVal.join(" ");
   },
-  { deep: true }
+  { deep: true },
 );
 
 const isValid = computed(() => {
-  return error.value === '' && patternString.value.trim().length > 0;
+  return error.value === "" && patternString.value.trim().length > 0;
 });
 
 const validatePattern = (input: string): boolean => {
   // Remove spaces and check each character
-  const clean = input.replace(/\s/g, '');
+  const clean = input.replace(/\s/g, "");
   if (clean.length === 0) {
-    error.value = 'Pattern cannot be empty';
+    error.value = "Pattern cannot be empty";
     return false;
   }
 
   for (let i = 0; i < clean.length; i++) {
     const char = clean[i];
-    if (char === '!') {
+    if (char === "!") {
       // Check if ! is preceded by L or R
-      if (i === 0 || (clean[i - 1] !== 'L' && clean[i - 1] !== 'R')) {
-        error.value = 'Accent (!) must follow L or R';
+      if (i === 0 || (clean[i - 1] !== "L" && clean[i - 1] !== "R")) {
+        error.value = "Accent (!) must follow L or R";
         return false;
       }
-    } else if (char !== 'L' && char !== 'R') {
-      error.value = 'Pattern can only contain L, R, and !';
+    } else if (char !== "L" && char !== "R") {
+      error.value = "Pattern can only contain L, R, and !";
       return false;
     }
   }
 
-  error.value = '';
+  error.value = "";
   return true;
 };
 
 const parsePattern = (input: string): string[] => {
-  const clean = input.replace(/\s/g, '');
+  const clean = input.replace(/\s/g, "");
   const result: string[] = [];
 
   for (let i = 0; i < clean.length; i++) {
-    if (clean[i] === '!') {
+    if (clean[i] === "!") {
       // Append to previous character
       if (result.length > 0) {
-        result[result.length - 1] += '!';
+        result[result.length - 1] += "!";
       }
     } else {
       result.push(clean[i]);
@@ -74,14 +74,14 @@ const handleInput = (e: Event) => {
 
   if (validatePattern(value)) {
     const parsed = parsePattern(value);
-    emit('update:modelValue', parsed);
+    emit("update:modelValue", parsed);
   }
 };
 
 const clearPattern = () => {
-  patternString.value = '';
-  error.value = '';
-  emit('update:modelValue', []);
+  patternString.value = "";
+  error.value = "";
+  emit("update:modelValue", []);
 };
 </script>
 
@@ -101,36 +101,21 @@ const clearPattern = () => {
         ×
       </button>
     </div>
-    
+
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
-    
+
     <div class="pattern-help">
       <span class="help-key left">L</span> Left
       <span class="help-key right">R</span> Right
       <span class="help-key accent">!</span> Accent
     </div>
-    
-    <div class="pattern-preview" v-if="isValid && modelValue.length > 0">
-      <span 
-        v-for="(beat, index) in modelValue" 
-        :key="index"
-        class="beat-char"
-        :class="{
-          'is-left': beat.startsWith('L') && !beat.includes('!'),
-          'is-right': beat.startsWith('R') && !beat.includes('!'),
-          'is-accent': beat.includes('!')
-        }"
-      >
-        {{ beat.replace('!', '') }}
-      </span>
-    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-@use '../styles/variables' as *;
+@use "../styles/variables" as *;
 
 .pattern-input {
   @include flex-column;
@@ -211,15 +196,15 @@ const clearPattern = () => {
   place-items: center;
 
   &.left {
-    background: $beat-left;
+    border: 2px solid $beat-left;
   }
 
   &.right {
-    background: $beat-right;
+    border: 2px solid $beat-right;
   }
 
   &.accent {
-    background: $beat-accent;
+    border: 2px solid $beat-accent;
   }
 }
 
