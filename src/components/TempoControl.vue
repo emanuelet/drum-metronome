@@ -457,13 +457,51 @@ const getSliderPosition = (bpm: number): string => {
     padding: $spacing-lg;
   }
 
-  .tempo-input {
-    font-size: $font-5xl;
-    width: 100px;
+  .tempo-top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-md;
   }
 
-  .mark-label {
-    font-size: 0.55rem;
+  .tempo-display {
+    --tempo-control-size: clamp(2.25rem, 12vw, 2.75rem);
+
+    width: 100%;
+    justify-content: space-between;
+    gap: $spacing-xs;
+  }
+
+  .tempo-step-buttons {
+    gap: 2px;
+  }
+
+  .tempo-input {
+    min-width: 0;
+    width: calc(var(--tempo-control-size) * 2);
+    font-size: clamp(1.75rem, 10vw, $font-5xl);
+  }
+
+  .tap-button {
+    width: 100%;
+    padding: $spacing-md;
+  }
+
+  .slider-container {
+    padding-bottom: 0;
+  }
+
+  .tempo-marks {
+    display: none;
+  }
+
+  .tempo-range {
+    margin-top: 0;
+    font-size: $font-lg;
+  }
+
+  .tap-message {
+    top: auto;
+    bottom: calc(100% + #{$spacing-sm});
   }
 }
 </style>

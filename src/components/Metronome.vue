@@ -340,6 +340,29 @@ const canPlay = computed(() => {
   margin-top: -$spacing-lg;
 }
 
+@media (max-width: $breakpoint-sm) {
+  .metronome {
+    padding: $spacing-lg;
+  }
+
+  .metronome-header {
+    margin-bottom: $spacing-xl;
+  }
+
+  .title {
+    font-size: $font-3xl;
+  }
+
+  .subtitle {
+    font-size: $font-base;
+  }
+
+  .play-button {
+    width: 52px;
+    height: 52px;
+  }
+}
+
 @media (min-width: $breakpoint-md) {
   .metronome {
     padding: $spacing-2xl;
