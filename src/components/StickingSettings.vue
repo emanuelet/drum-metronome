@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { stickingColorPresets } from "../composables/useStickingSettings";
+import { stickingColorPresets } from '../composables/useStickingSettings';
 
 defineProps<{
   presetId: string;
 }>();
 
 const emit = defineEmits<{
-  "update:presetId": [value: string];
+  'update:presetId': [value: string];
 }>();
 </script>
 
@@ -32,11 +32,12 @@ const emit = defineEmits<{
 
     <div
       class="color-preview"
-      aria-label="Left, right, accent, and active sticking colors"
+      aria-label="Left, right, accent, flam, and active sticking colors"
     >
       <span class="left" title="Left"></span>
       <span class="right" title="Right"></span>
       <span class="accent" title="Accent"></span>
+      <span class="flam" title="Flam"></span>
       <span class="active" title="Active"></span>
     </div>
   </section>
@@ -98,6 +99,10 @@ const emit = defineEmits<{
 
     .accent {
       background: $beat-accent;
+    }
+
+    .flam {
+      background: $beat-flam;
     }
 
     .active {

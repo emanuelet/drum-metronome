@@ -7,7 +7,7 @@ A web-based metronome designed specifically for drummers with support for sticki
 ![Screenshot](screenshot.png)
 ## Features
 
-- **Sticking Patterns** - Enter custom patterns using L (left), R (right), and ! (accent)
+- **Sticking Patterns** - Enter custom patterns using L (left), R (right), F (flam), and ! (accent)
 - **Quick Presets** - Single Stroke, Double Stroke, Paradiddle, Triplets, Flam Accent, Single Seven
 - **Visual Beat Indicator** - Animated circles showing current beat with accent highlighting (purple for accents)
 - **Italian Tempo Markings** - Click on Largo, Adagio, Andante, Moderato, Allegro, Presto, or Prestissimo to set BPM

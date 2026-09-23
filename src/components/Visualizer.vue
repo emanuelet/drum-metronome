@@ -26,6 +26,7 @@ const emit = defineEmits<{
 
 const getBeatClass = (beat: string): string => {
   if (beat.includes('!')) return 'accent';
+  if (beat === 'F') return 'flam';
   if (beat === 'L') return 'left';
   if (beat === 'R') return 'right';
   return 'normal';
@@ -373,6 +374,11 @@ const gapProgress = computed(() => {
     box-shadow: 0 0 15px $beat-accent;
   }
 
+  &.flam {
+    background: $beat-flam;
+    box-shadow: 0 0 12px $beat-flam;
+  }
+
   &.is-active {
     transform: scale(1.2);
     box-shadow: 0 0 25px $beat-active;
@@ -385,6 +391,12 @@ const gapProgress = computed(() => {
       transform: scale(1.3);
       box-shadow:
         0 0 30px $beat-accent,
+        0 0 45px $beat-active;
+    }
+
+    &.flam {
+      box-shadow:
+        0 0 25px $beat-flam,
         0 0 45px $beat-active;
     }
   }

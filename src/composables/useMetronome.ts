@@ -8,6 +8,7 @@ export function useMetronome() {
   const subdivisionCounter = ref(0);
   const nextNoteTime = ref(0);
   const timerID = ref<number | null>(null);
+  const snareNoiseBuffer = ref<AudioBuffer | null>(null);
   const lookahead = 25.0;
   const scheduleAheadTime = 0.1;
 
@@ -43,29 +44,65 @@ export function useMetronome() {
     }
   };
 
-  const createClickSound = (isAccent: boolean, startTime: number) => {
+  const getSnareNoiseBuffer = () => {
+    if (!audioContext.value) return null;
+    if (snareNoiseBuffer.value) return snareNoiseBuffer.value;
+
+    const buffer = audioContext.value.createBuffer(
+      1,
+      audioContext.value.sampleRate * 0.16,
+      audioContext.value.sampleRate
+    );
+    const samples = buffer.getChannelData(0);
+    for (let index = 0; index < samples.length; index++) {
+      samples[index] = Math.random() * 2 - 1;
+    }
+    snareNoiseBuffer.value = buffer;
+    return buffer;
+  };
+
+  const createSnareSound = (isAccent: boolean, startTime: number, volumeMultiplier = 1) => {
     if (!audioContext.value) return;
 
-    const oscillator = audioContext.value.createOscillator();
-    const gainNode = audioContext.value.createGain();
-    const duration = isAccent ? 0.09 : 0.055;
-    const startFrequency = isAccent ? 1800 : 1100;
-    const endFrequency = isAccent ? 650 : 350;
-    const volume = isAccent ? 0.32 : 0.22;
+    const noiseBuffer = getSnareNoiseBuffer();
+    if (!noiseBuffer) return;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.value.destination);
+    const noise = audioContext.value.createBufferSource();
+    const noiseFilter = audioContext.value.createBiquadFilter();
+    const noiseGain = audioContext.value.createGain();
+    const body = audioContext.value.createOscillator();
+    const bodyGain = audioContext.value.createGain();
+    const duration = isAccent ? 0.16 : 0.11;
+    const volume = (isAccent ? 0.26 : 0.18) * volumeMultiplier;
 
-    oscillator.type = isAccent ? 'sine' : 'triangle';
-    oscillator.frequency.setValueAtTime(startFrequency, startTime);
-    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startTime + duration);
+    noise.buffer = noiseBuffer;
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.setValueAtTime(isAccent ? 1200 : 900, startTime);
+    noiseGain.gain.setValueAtTime(volume, startTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.005);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    body.type = 'triangle';
+    body.frequency.setValueAtTime(isAccent ? 240 : 200, startTime);
+    body.frequency.exponentialRampToValueAtTime(110, startTime + 0.06);
+    bodyGain.gain.setValueAtTime(volume * 0.55, startTime);
+    bodyGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
 
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(audioContext.value.destination);
+    body.connect(bodyGain);
+    bodyGain.connect(audioContext.value.destination);
+
+    noise.start(startTime);
+    noise.stop(startTime + duration);
+    body.start(startTime);
+    body.stop(startTime + 0.08);
+  };
+
+  const createFlamSound = (startTime: number) => {
+    // A quiet grace note immediately precedes the full primary stroke.
+    createSnareSound(false, startTime, 0.4);
+    createSnareSound(false, startTime + 0.03);
   };
 
   const playBeat = (beatType: string) => {
@@ -80,7 +117,10 @@ export function useMetronome() {
       case 'R':
       case 'L!':
       case 'R!':
-        createClickSound(isAccent, nextNoteTime.value);
+        createSnareSound(isAccent, nextNoteTime.value);
+        break;
+      case 'F':
+        createFlamSound(nextNoteTime.value);
         break;
     }
   };
@@ -93,7 +133,7 @@ export function useMetronome() {
     if (leftHandPattern.value.length > 0) {
       const leftBeat = leftHandPattern.value[leftHandBeat.value % leftHandPattern.value.length];
       if (leftBeat.includes('L')) {
-        createClickSound(leftBeat.includes('!'), nextNoteTime.value);
+        createSnareSound(leftBeat.includes('!'), nextNoteTime.value);
       }
     }
 
@@ -101,7 +141,7 @@ export function useMetronome() {
     if (rightHandPattern.value.length > 0) {
       const rightBeat = rightHandPattern.value[rightHandBeat.value % rightHandPattern.value.length];
       if (rightBeat.includes('R')) {
-        createClickSound(rightBeat.includes('!'), nextNoteTime.value);
+        createSnareSound(rightBeat.includes('!'), nextNoteTime.value);
       }
     }
   };

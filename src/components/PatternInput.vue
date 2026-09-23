@@ -36,8 +36,8 @@ const validatePattern = (input: string): boolean => {
         error.value = 'Accent (!) must follow L or R';
         return false;
       }
-    } else if (char !== 'L' && char !== 'R') {
-      error.value = 'Pattern can only contain L, R, and !';
+    } else if (char !== 'L' && char !== 'R' && char !== 'F') {
+      error.value = 'Pattern can only contain L, R, F, and !';
       return false;
     }
   }
@@ -90,7 +90,7 @@ const clearPattern = () => {
         class="pattern-field"
         :value="patternString"
         @input="handleInput"
-        placeholder="e.g., L!RL RLR!L"
+        placeholder="e.g., F LRL F RLR"
         :class="{ 'has-error': error }"
       />
       <button v-if="patternString" class="clear-button" @click="clearPattern">
@@ -106,6 +106,7 @@ const clearPattern = () => {
       <span class="help-key left">L</span> Left
       <span class="help-key right">R</span> Right
       <span class="help-key accent">!</span> Accent
+      <span class="help-key flam">F</span> Flam
     </div>
   </div>
 </template>
@@ -201,6 +202,10 @@ const clearPattern = () => {
 
   &.accent {
     border: 2px solid $beat-accent;
+  }
+
+  &.flam {
+    border: 2px solid $beat-flam;
   }
 }
 

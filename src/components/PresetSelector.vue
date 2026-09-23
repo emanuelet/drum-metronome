@@ -32,7 +32,7 @@ const presets: Preset[] = [
   },
   {
     name: 'Flam Accent',
-    pattern: ['R!', 'L', 'R', 'L!', 'R', 'L'],
+    pattern: ['F', 'L', 'R', 'F', 'R', 'L'],
     description: 'Accented flams',
   },
   {

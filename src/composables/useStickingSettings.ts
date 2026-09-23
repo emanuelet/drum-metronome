@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 type ColorScheme = 'light' | 'dark';
-type StickingColors = Record<'left' | 'right' | 'accent' | 'active', string>;
+type StickingColors = Record<'left' | 'right' | 'accent' | 'flam' | 'active', string>;
 
 export type StickingColorPreset = {
   id: string;
@@ -14,40 +14,100 @@ export const stickingColorPresets: StickingColorPreset[] = [
     id: 'classic',
     name: 'Classic',
     colors: {
-      light: { left: '#4dabf7', right: '#ff8787', accent: '#9b59b6', active: '#40c057' },
-      dark: { left: '#74c0fc', right: '#ffa8a8', accent: '#d0bfff', active: '#69db7c' },
+      light: {
+        left: '#4dabf7',
+        right: '#ff8787',
+        accent: '#9b59b6',
+        flam: '#f08c00',
+        active: '#40c057',
+      },
+      dark: {
+        left: '#74c0fc',
+        right: '#ffa8a8',
+        accent: '#d0bfff',
+        flam: '#ffd43b',
+        active: '#69db7c',
+      },
     },
   },
   {
     id: 'ocean',
     name: 'Ocean',
     colors: {
-      light: { left: '#1971c2', right: '#f08c00', accent: '#0c8599', active: '#099268' },
-      dark: { left: '#4dabf7', right: '#ffd43b', accent: '#3bc9db', active: '#38d9a9' },
+      light: {
+        left: '#1971c2',
+        right: '#f08c00',
+        accent: '#0c8599',
+        flam: '#e64980',
+        active: '#099268',
+      },
+      dark: {
+        left: '#4dabf7',
+        right: '#ffd43b',
+        accent: '#3bc9db',
+        flam: '#faa2c1',
+        active: '#38d9a9',
+      },
     },
   },
   {
     id: 'sunset',
     name: 'Sunset',
     colors: {
-      light: { left: '#e64980', right: '#f76707', accent: '#f59f00', active: '#2f9e44' },
-      dark: { left: '#faa2c1', right: '#ffa94d', accent: '#ffd43b', active: '#69db7c' },
+      light: {
+        left: '#e64980',
+        right: '#f76707',
+        accent: '#f59f00',
+        flam: '#7048e8',
+        active: '#2f9e44',
+      },
+      dark: {
+        left: '#faa2c1',
+        right: '#ffa94d',
+        accent: '#ffd43b',
+        flam: '#b197fc',
+        active: '#69db7c',
+      },
     },
   },
   {
     id: 'forest',
     name: 'Forest',
     colors: {
-      light: { left: '#2b8a3e', right: '#c92a2a', accent: '#e67700', active: '#0ca678' },
-      dark: { left: '#69db7c', right: '#ff8787', accent: '#fcc419', active: '#63e6be' },
+      light: {
+        left: '#2b8a3e',
+        right: '#c92a2a',
+        accent: '#e67700',
+        flam: '#1971c2',
+        active: '#0ca678',
+      },
+      dark: {
+        left: '#69db7c',
+        right: '#ff8787',
+        accent: '#fcc419',
+        flam: '#4dabf7',
+        active: '#63e6be',
+      },
     },
   },
   {
     id: 'neon',
     name: 'Neon',
     colors: {
-      light: { left: '#0b7285', right: '#d6336c', accent: '#ae3ec9', active: '#37b24d' },
-      dark: { left: '#22b8cf', right: '#f783ac', accent: '#e599f7', active: '#51cf66' },
+      light: {
+        left: '#0b7285',
+        right: '#d6336c',
+        accent: '#ae3ec9',
+        flam: '#e8590c',
+        active: '#37b24d',
+      },
+      dark: {
+        left: '#22b8cf',
+        right: '#f783ac',
+        accent: '#e599f7',
+        flam: '#ffa94d',
+        active: '#51cf66',
+      },
     },
   },
 ];
@@ -81,6 +141,7 @@ export function useStickingSettings() {
     root.setProperty('--beat-left', colors.left);
     root.setProperty('--beat-right', colors.right);
     root.setProperty('--beat-accent', colors.accent);
+    root.setProperty('--beat-flam', colors.flam);
     root.setProperty('--beat-active', colors.active);
   };
 
