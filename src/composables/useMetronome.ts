@@ -1,5 +1,28 @@
 import { computed, onUnmounted, ref } from 'vue';
 
+export const clicksPerBeatOptions = [
+  0.125,
+  0.25,
+  0.33,
+  0.5,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+] as const;
+
 export function useMetronome() {
   const audioContext = ref<AudioContext | null>(null);
   const isPlaying = ref(false);
@@ -161,19 +184,30 @@ export function useMetronome() {
     if (!isPlaying.value || !audioContext.value) return;
 
     while (nextNoteTime.value < audioContext.value.currentTime + scheduleAheadTime) {
-      if (polyrhythmEnabled.value) {
-        // Polyrhythm mode - play both hands
-        playPolyrhythmBeats();
-      } else {
-        // Standard mode - play single pattern
-        if (pattern.value.length > 0) {
-          const beatType = pattern.value[beatCounter.value % pattern.value.length];
-          playBeat(beatType);
+      const isFractionalRate = subdivisions.value < 1;
+      const beatsPerClick = isFractionalRate ? Math.round(1 / subdivisions.value) : 1;
+      const shouldPlayClick = !isFractionalRate || subdivisionCounter.value === 0;
+
+      if (shouldPlayClick) {
+        if (polyrhythmEnabled.value) {
+          // Polyrhythm mode - play both hands
+          playPolyrhythmBeats();
+        } else {
+          // Standard mode - play single pattern
+          if (pattern.value.length > 0) {
+            const beatType = pattern.value[beatCounter.value % pattern.value.length];
+            playBeat(beatType);
+          }
         }
       }
 
-      subdivisionCounter.value++;
-      if (subdivisionCounter.value === subdivisions.value) {
+      if (isFractionalRate) {
+        subdivisionCounter.value = (subdivisionCounter.value + 1) % beatsPerClick;
+      } else {
+        subdivisionCounter.value++;
+      }
+
+      if (isFractionalRate || subdivisionCounter.value === subdivisions.value) {
         subdivisionCounter.value = 0;
 
         if (polyrhythmEnabled.value) {
@@ -197,7 +231,7 @@ export function useMetronome() {
         }
       }
 
-      nextNoteTime.value += 60.0 / tempo.value / subdivisions.value;
+      nextNoteTime.value += 60.0 / tempo.value / Math.max(1, subdivisions.value);
     }
 
     timerID.value = window.setTimeout(scheduler, lookahead);
@@ -259,7 +293,11 @@ export function useMetronome() {
   };
 
   const setSubdivisions = (newSubdivisions: number) => {
-    subdivisions.value = Math.max(1, Math.min(16, Math.round(newSubdivisions)));
+    subdivisions.value = clicksPerBeatOptions.reduce((closest, option) =>
+      Math.abs(option - newSubdivisions) < Math.abs(closest - newSubdivisions)
+        ? option
+        : closest
+    );
     subdivisionCounter.value = 0;
   };
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Pause, Play } from "@lucide/vue";
+import { ChevronDown, Pause, Play } from "@lucide/vue";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useMetronome } from "../composables/useMetronome";
 import { useStickingSettings } from "../composables/useStickingSettings";
@@ -15,6 +15,7 @@ import Visualizer from "./Visualizer.vue";
 const pattern = ref<string[]>(["R", "L", "R", "L"]);
 const tempo = ref(120);
 const clicksPerBeat = ref(1);
+const settingsOpen = ref(false);
 const { presetId, beatsPerRow } = useStickingSettings();
 
 // Gap training state
@@ -90,16 +91,26 @@ const togglePlay = () => {
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.code !== "Space" || event.repeat || !canPlay.value) return;
-
   const target = event.target as HTMLElement | null;
   if (
     target?.closest('input, textarea, select, button, [contenteditable="true"]')
   )
     return;
 
-  event.preventDefault();
-  togglePlay();
+  if (event.code === "Space" && !event.repeat && canPlay.value) {
+    event.preventDefault();
+    togglePlay();
+  }
+
+  if (event.code === "ArrowLeft") {
+    event.preventDefault();
+    handleTempoChange(tempo.value - 5);
+  }
+
+  if (event.code === "ArrowRight") {
+    event.preventDefault();
+    handleTempoChange(tempo.value + 5);
+  }
 };
 
 onMounted(() => {
@@ -188,6 +199,26 @@ const canPlay = computed(() => {
           :left-hand-beat="leftHandBeat"
           :right-hand-beat="rightHandBeat"
         />
+        <aside class="keyboard-shortcuts" aria-label="Keyboard shortcuts">
+          <div class="shortcuts-heading">
+            <span class="shortcuts-title">Keyboard Shortcuts</span>
+            <span class="shortcuts-description">Control playback without the mouse</span>
+          </div>
+          <div class="shortcuts-list">
+            <div class="shortcut">
+              <kbd>Space</kbd>
+              <span>Play / pause</span>
+            </div>
+            <div class="shortcut">
+              <kbd>Left</kbd>
+              <span>Tempo -5</span>
+            </div>
+            <div class="shortcut">
+              <kbd>Right</kbd>
+              <span>Tempo +5</span>
+            </div>
+          </div>
+        </aside>
       </section>
 
       <section class="control-section">
@@ -211,21 +242,32 @@ const canPlay = computed(() => {
       </section>
 
       <section class="settings-section">
-        <h2>Settings</h2>
-        <StickingSettings
-          v-if="!polyrhythmEnabled"
-          v-model:preset-id="presetId"
-        />
-        <GapTraining
-          v-model:enabled="gapEnabled"
-          v-model:measures-with-click="measuresWithClick"
-          v-model:measures-without-click="measuresWithoutClick"
-        />
-        <Polyrhythm
-          v-model:enabled="polyrhythmEnabled"
-          v-model:left-hand-pattern="leftHandPattern"
-          v-model:right-hand-pattern="rightHandPattern"
-        />
+        <button
+          class="settings-toggle"
+          type="button"
+          :aria-expanded="settingsOpen"
+          aria-controls="settings-content"
+          @click="settingsOpen = !settingsOpen"
+        >
+          <h2>Settings</h2>
+          <ChevronDown :size="24" :class="{ 'is-open': settingsOpen }" />
+        </button>
+        <div v-if="settingsOpen" id="settings-content" class="settings-content">
+          <StickingSettings
+            v-if="!polyrhythmEnabled"
+            v-model:preset-id="presetId"
+          />
+          <GapTraining
+            v-model:enabled="gapEnabled"
+            v-model:measures-with-click="measuresWithClick"
+            v-model:measures-without-click="measuresWithoutClick"
+          />
+          <Polyrhythm
+            v-model:enabled="polyrhythmEnabled"
+            v-model:left-hand-pattern="leftHandPattern"
+            v-model:right-hand-pattern="rightHandPattern"
+          />
+        </div>
       </section>
 
       <p v-if="!canPlay" class="play-hint">
@@ -284,14 +326,43 @@ const canPlay = computed(() => {
   width: 100%;
 }
 
+.visualizer-section {
+  position: relative;
+}
+
+.keyboard-shortcuts {
+  display: none;
+}
+
 .settings-section {
   @include flex-column;
   gap: $spacing-lg;
+}
+
+.settings-toggle {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: $text-primary;
 
   h2 {
-    color: $text-primary;
     font-size: $font-2xl;
   }
+
+  svg {
+    transition: transform $transition-base;
+  }
+
+  .is-open {
+    transform: rotate(180deg);
+  }
+}
+
+.settings-content {
+  @include flex-column;
+  gap: $spacing-lg;
 }
 
 .play-button {
@@ -370,6 +441,72 @@ const canPlay = computed(() => {
 
   .title {
     font-size: $font-5xl;
+  }
+}
+
+@media (min-width: 1201px) {
+  .keyboard-shortcuts {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + #{$spacing-2xl});
+    display: grid;
+    gap: $spacing-lg;
+    width: 12rem;
+    padding: $spacing-lg;
+    color: $text-secondary;
+    background: $bg-secondary;
+    border: 1px solid $border-color;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    transform: translateY(-50%);
+  }
+
+  .shortcuts-heading {
+    display: grid;
+    gap: $spacing-xs;
+  }
+
+  .shortcuts-title {
+    color: $text-primary;
+    font-size: $font-lg;
+    font-weight: 700;
+  }
+
+  .shortcuts-description {
+    color: $text-muted;
+    font-size: $font-sm;
+    line-height: 1.35;
+  }
+
+  .shortcuts-list {
+    display: grid;
+    gap: $spacing-sm;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color;
+  }
+
+  .shortcut {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-md;
+    font-size: $font-base;
+  }
+
+  kbd {
+    display: inline-grid;
+    min-width: 3.25rem;
+    min-height: 2.25rem;
+    padding: $spacing-xs $spacing-sm;
+    color: $text-primary;
+    font-family: inherit;
+    font-size: $font-sm;
+    font-weight: 700;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, $text-muted 30%, transparent);
+    place-items: center;
   }
 }
 </style>

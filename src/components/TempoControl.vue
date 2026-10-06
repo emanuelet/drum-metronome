@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { clicksPerBeatOptions } from '../composables/useMetronome';
 import { useTapTempo } from '../composables/useTapTempo';
 
 const props = defineProps<{
@@ -85,6 +86,37 @@ const setTempoFromMark = (bpm: number) => {
   reset();
 };
 
+const clicksPerBeatIndex = computed(() =>
+  Math.max(
+    0,
+    clicksPerBeatOptions.indexOf(props.clicksPerBeat as (typeof clicksPerBeatOptions)[number])
+  )
+);
+
+const handleClicksPerBeatChange = (event: Event) => {
+  const index = Number((event.target as HTMLInputElement).value);
+  emit('update:clicksPerBeat', clicksPerBeatOptions[index]);
+};
+
+const setClicksPerBeat = (clicksPerBeat: number) => {
+  emit('update:clicksPerBeat', clicksPerBeat);
+};
+
+const getClicksPerBeatPosition = (index: number): string =>
+  `${(index / (clicksPerBeatOptions.length - 1)) * 100}%`;
+
+const isLabeledClicksPerBeatStep = (clicksPerBeat: number): boolean =>
+  [0.125, 0.25, 0.33, 0.5, 1, 2, 4, 8, 16].includes(clicksPerBeat);
+
+const clicksPerBeatLabel = computed(() => {
+  if (props.clicksPerBeat >= 1) {
+    return `${props.clicksPerBeat} ${props.clicksPerBeat === 1 ? 'click' : 'clicks'} / 1 beat`;
+  }
+
+  const beats = Math.round(1 / props.clicksPerBeat);
+  return `1 click / ${beats} beats`;
+});
+
 const getSliderPosition = (bpm: number): string => {
   const min = 20;
   const max = 300;
@@ -156,19 +188,35 @@ const getSliderPosition = (bpm: number): string => {
       <div class="clicks-control">
         <div class="clicks-header">
           <label for="clicks-per-beat">Clicks per beat</label>
-          <output for="clicks-per-beat">{{ clicksPerBeat }}</output>
+          <output for="clicks-per-beat">{{ clicksPerBeatLabel }}</output>
         </div>
-        <input
-          id="clicks-per-beat"
-          type="range"
-          class="subdivision-slider"
-          :value="clicksPerBeat"
-          min="1"
-          max="16"
-          step="1"
-          @input="emit('update:clicksPerBeat', Number(($event.target as HTMLInputElement).value))"
-        />
-        <div class="clicks-range"><span>1</span><span>16</span></div>
+        <div class="subdivision-slider-container">
+          <input
+            id="clicks-per-beat"
+            type="range"
+            class="subdivision-slider"
+            :value="clicksPerBeatIndex"
+            min="0"
+            :max="clicksPerBeatOptions.length - 1"
+            step="1"
+            @input="handleClicksPerBeatChange"
+          />
+          <div class="subdivision-marks">
+            <button
+              v-for="(option, index) in clicksPerBeatOptions"
+              :key="option"
+              type="button"
+              class="subdivision-mark"
+              :class="{ 'is-active': option === clicksPerBeat }"
+              :style="{ left: getClicksPerBeatPosition(index) }"
+              :aria-label="`${option} clicks per beat`"
+              @click="setClicksPerBeat(option)"
+            >
+              <span class="subdivision-tick"></span>
+              <span v-if="isLabeledClicksPerBeatStep(option)" class="subdivision-label">{{ option }}</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -246,7 +294,7 @@ const getSliderPosition = (bpm: number): string => {
 
 .slider-container {
   position: relative;
-  padding-bottom: 2.5rem;
+  padding-bottom: 1.2rem;
 }
 
 .tempo-slider {
@@ -346,6 +394,7 @@ const getSliderPosition = (bpm: number): string => {
   justify-content: space-between;
   font-size: $font-2xl;
   font-weight: 600;
+  padding-bottom: 0.6rem;
   color: $text-muted;
   margin-top: -$spacing-lg;
 }
@@ -372,15 +421,17 @@ const getSliderPosition = (bpm: number): string => {
   font-weight: 600;
 
   output {
-    display: grid;
-    width: 2rem;
-    height: 2rem;
+    padding: $spacing-xs $spacing-sm;
     color: white;
-    font-size: $font-lg;
+    font-size: $font-base;
     background: $accent-primary;
-    border-radius: 50%;
-    place-items: center;
+    border-radius: $radius-sm;
   }
+}
+
+.subdivision-slider-container {
+  position: relative;
+  padding-bottom: 2.5rem;
 }
 
 .subdivision-slider {
@@ -411,10 +462,55 @@ const getSliderPosition = (bpm: number): string => {
   }
 }
 
-.clicks-range {
-  margin-top: -$spacing-xs;
+.subdivision-marks {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  height: 40px;
+  pointer-events: none;
+}
+
+.subdivision-mark {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0;
   color: $text-muted;
-  font-size: $font-base;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translateX(-50%);
+
+  &:hover,
+  &.is-active {
+    .subdivision-tick {
+      height: 16px;
+      background: $accent-primary;
+    }
+
+    .subdivision-label {
+      color: $accent-primary;
+      font-weight: 600;
+    }
+  }
+}
+
+.subdivision-tick {
+  width: 2px;
+  height: 10px;
+  background: $text-muted;
+  transition: height $transition-base, background $transition-base;
+}
+
+.subdivision-label {
+  color: $text-muted;
+  font-size: $font-xs;
+  white-space: nowrap;
+  transition: color $transition-base;
 }
 
 .tap-button {
@@ -490,8 +586,13 @@ const getSliderPosition = (bpm: number): string => {
     padding-bottom: 0;
   }
 
-  .tempo-marks {
+  .tempo-marks,
+  .subdivision-marks {
     display: none;
+  }
+
+  .subdivision-slider-container {
+    padding-bottom: 0;
   }
 
   .tempo-range {
