@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const localTempo = ref(props.modelValue);
+const tempoInput = ref<HTMLInputElement | null>(null);
 const { tap, reset, tapCount } = useTapTempo();
 const tapMessage = ref('');
 
@@ -123,6 +124,10 @@ const getSliderPosition = (bpm: number): string => {
   const percentage = ((bpm - min) / (max - min)) * 100;
   return `${percentage}%`;
 };
+
+defineExpose({
+  focus: () => tempoInput.value?.focus(),
+});
 </script>
 
 <template>
@@ -135,6 +140,7 @@ const getSliderPosition = (bpm: number): string => {
         </div>
         <input
           type="number"
+          ref="tempoInput"
           class="tempo-input"
           :value="localTempo"
           @change="handleInputChange"

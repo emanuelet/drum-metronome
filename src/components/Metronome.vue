@@ -15,7 +15,10 @@ import Visualizer from "./Visualizer.vue";
 const pattern = ref<string[]>(["R", "L", "R", "L"]);
 const tempo = ref(120);
 const clicksPerBeat = ref(1);
+const beatSizeAdjustment = ref(0);
 const settingsOpen = ref(false);
+const tempoControl = ref<{ focus: () => void } | null>(null);
+const patternInput = ref<{ focus: () => void } | null>(null);
 const { presetId, beatsPerRow } = useStickingSettings();
 
 // Gap training state
@@ -111,6 +114,16 @@ const handleKeydown = (event: KeyboardEvent) => {
     event.preventDefault();
     handleTempoChange(tempo.value + 5);
   }
+
+  if (event.code === "KeyS") {
+    event.preventDefault();
+    patternInput.value?.focus();
+  }
+
+  if (event.code === "KeyT") {
+    event.preventDefault();
+    tempoControl.value?.focus();
+  }
 };
 
 onMounted(() => {
@@ -186,6 +199,8 @@ const canPlay = computed(() => {
           :pattern="pattern"
           :beats-per-row="beatsPerRow"
           @update:beats-per-row="beatsPerRow = $event"
+          :beat-size-adjustment="beatSizeAdjustment"
+          @update:beat-size-adjustment="beatSizeAdjustment = $event"
           :current-beat="currentBeat"
           :is-playing="isPlaying"
           :gap-enabled="gapEnabled"
@@ -217,12 +232,21 @@ const canPlay = computed(() => {
               <kbd>Right</kbd>
               <span>Tempo +5</span>
             </div>
+            <div class="shortcut">
+              <kbd>S</kbd>
+              <span>Sticking pattern</span>
+            </div>
+            <div class="shortcut">
+              <kbd>T</kbd>
+              <span>Tempo</span>
+            </div>
           </div>
         </aside>
       </section>
 
       <section class="control-section">
         <TempoControl
+          ref="tempoControl"
           :model-value="tempo"
           :clicks-per-beat="clicksPerBeat"
           @update:model-value="handleTempoChange"
@@ -232,6 +256,7 @@ const canPlay = computed(() => {
 
       <section v-if="!polyrhythmEnabled" class="pattern-section">
         <PatternInput
+          ref="patternInput"
           v-model="pattern"
           @update:model-value="handlePatternChange"
         />
@@ -488,7 +513,6 @@ const canPlay = computed(() => {
   .shortcut {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: $spacing-md;
     font-size: $font-base;
   }

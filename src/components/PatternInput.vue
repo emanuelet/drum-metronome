@@ -11,6 +11,7 @@ const emit = defineEmits<{
 
 const patternString = ref(props.modelValue.join(' '));
 const error = ref('');
+const patternField = ref<HTMLInputElement | null>(null);
 
 watch(
   () => props.modelValue,
@@ -79,6 +80,10 @@ const clearPattern = () => {
   error.value = '';
   emit('update:modelValue', []);
 };
+
+defineExpose({
+  focus: () => patternField.value?.focus(),
+});
 </script>
 
 <template>
@@ -87,6 +92,7 @@ const clearPattern = () => {
     <div class="pattern-input-wrapper">
       <input
         type="text"
+        ref="patternField"
         class="pattern-field"
         :value="patternString"
         @input="handleInput"

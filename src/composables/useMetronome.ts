@@ -28,6 +28,7 @@ export function useMetronome() {
   const isPlaying = ref(false);
   const isPaused = ref(false);
   const beatCounter = ref(0);
+  const displayedBeat = ref(0);
   const subdivisionCounter = ref(0);
   const nextNoteTime = ref(0);
   const timerID = ref<number | null>(null);
@@ -52,11 +53,37 @@ export function useMetronome() {
   const rightHandPattern = ref<string[]>([]);
   const leftHandBeat = ref(0);
   const rightHandBeat = ref(0);
+  const displayedLeftHandBeat = ref(0);
+  const displayedRightHandBeat = ref(0);
+  const visualTimerIDs = new Set<number>();
 
   const currentBeat = computed(() => {
     if (pattern.value.length === 0) return 0;
-    return beatCounter.value % pattern.value.length;
+    return displayedBeat.value % pattern.value.length;
   });
+
+  const scheduleVisualUpdate = () => {
+    const delay = Math.max(0, (nextNoteTime.value - audioContext.value!.currentTime) * 1000);
+    const scheduledBeat = beatCounter.value;
+    const scheduledLeftHandBeat = leftHandBeat.value;
+    const scheduledRightHandBeat = rightHandBeat.value;
+    const timerID = window.setTimeout(() => {
+      visualTimerIDs.delete(timerID);
+      if (!isPlaying.value) return;
+
+      displayedBeat.value = scheduledBeat;
+      displayedLeftHandBeat.value = scheduledLeftHandBeat;
+      displayedRightHandBeat.value = scheduledRightHandBeat;
+    }, delay);
+    visualTimerIDs.add(timerID);
+  };
+
+  const clearVisualUpdates = () => {
+    for (const timerID of visualTimerIDs) {
+      clearTimeout(timerID);
+    }
+    visualTimerIDs.clear();
+  };
 
   const initAudioContext = () => {
     if (!audioContext.value) {
@@ -95,8 +122,8 @@ export function useMetronome() {
     const noiseGain = audioContext.value.createGain();
     const body = audioContext.value.createOscillator();
     const bodyGain = audioContext.value.createGain();
-    const duration = isAccent ? 0.16 : 0.11;
-    const volume = (isAccent ? 0.26 : 0.18) * volumeMultiplier;
+    const duration = isAccent ? 0.2 : 0.11;
+    const volume = (isAccent ? 0.42 : 0.18) * volumeMultiplier;
 
     noise.buffer = noiseBuffer;
     noiseFilter.type = 'highpass';
@@ -105,9 +132,9 @@ export function useMetronome() {
     noiseGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
     body.type = 'triangle';
-    body.frequency.setValueAtTime(isAccent ? 240 : 200, startTime);
+    body.frequency.setValueAtTime(isAccent ? 280 : 200, startTime);
     body.frequency.exponentialRampToValueAtTime(110, startTime + 0.06);
-    bodyGain.gain.setValueAtTime(volume * 0.55, startTime);
+    bodyGain.gain.setValueAtTime(volume * (isAccent ? 0.7 : 0.55), startTime);
     bodyGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
 
     noise.connect(noiseFilter);
@@ -188,6 +215,8 @@ export function useMetronome() {
       const beatsPerClick = isFractionalRate ? Math.round(1 / subdivisions.value) : 1;
       const shouldPlayClick = !isFractionalRate || subdivisionCounter.value === 0;
 
+      scheduleVisualUpdate();
+
       if (shouldPlayClick) {
         if (polyrhythmEnabled.value) {
           // Polyrhythm mode - play both hands
@@ -208,7 +237,9 @@ export function useMetronome() {
       }
 
       if (isFractionalRate || subdivisionCounter.value === subdivisions.value) {
-        subdivisionCounter.value = 0;
+        if (!isFractionalRate) {
+          subdivisionCounter.value = 0;
+        }
 
         if (polyrhythmEnabled.value) {
           leftHandBeat.value++;
@@ -244,9 +275,12 @@ export function useMetronome() {
     isPlaying.value = true;
     isPaused.value = false;
     beatCounter.value = 0;
+    displayedBeat.value = 0;
     subdivisionCounter.value = 0;
     leftHandBeat.value = 0;
     rightHandBeat.value = 0;
+    displayedLeftHandBeat.value = 0;
+    displayedRightHandBeat.value = 0;
     currentMeasure.value = 0;
     isInGap.value = false;
     nextNoteTime.value = audioContext.value!.currentTime;
@@ -258,6 +292,7 @@ export function useMetronome() {
       clearTimeout(timerID.value);
       timerID.value = null;
     }
+    clearVisualUpdates();
   };
 
   const pause = () => {
@@ -281,9 +316,12 @@ export function useMetronome() {
     isPaused.value = false;
     clearScheduler();
     beatCounter.value = 0;
+    displayedBeat.value = 0;
     subdivisionCounter.value = 0;
     leftHandBeat.value = 0;
     rightHandBeat.value = 0;
+    displayedLeftHandBeat.value = 0;
+    displayedRightHandBeat.value = 0;
     currentMeasure.value = 0;
     isInGap.value = false;
   };
@@ -360,8 +398,8 @@ export function useMetronome() {
     polyrhythmEnabled,
     leftHandPattern,
     rightHandPattern,
-    leftHandBeat,
-    rightHandBeat,
+    leftHandBeat: displayedLeftHandBeat,
+    rightHandBeat: displayedRightHandBeat,
     // Methods
     start,
     pause,

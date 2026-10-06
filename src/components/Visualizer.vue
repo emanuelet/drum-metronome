@@ -4,6 +4,7 @@ import { computed } from 'vue';
 const props = defineProps<{
   pattern: string[];
   beatsPerRow?: number;
+  beatSizeAdjustment?: number;
   currentBeat: number;
   isPlaying: boolean;
   // Gap training props
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:beatsPerRow': [value: number];
+  'update:beatSizeAdjustment': [value: number];
 }>();
 
 const getBeatClass = (beat: string): string => {
@@ -41,8 +43,9 @@ const containerStyle = computed(() => {
   if (beatCount === 0) return {};
 
   // Calculate size based on number of beats
-  const baseSize = 64;
-  const minSize = 32;
+  const sizeAdjustment = props.beatSizeAdjustment || 0;
+  const baseSize = 64 + sizeAdjustment;
+  const minSize = Math.max(24, 32 + sizeAdjustment);
   const maxBeats = 16;
 
   let size = baseSize;
@@ -50,6 +53,8 @@ const containerStyle = computed(() => {
     const ratio = Math.min((beatCount - 8) / (maxBeats - 8), 1);
     size = baseSize - (baseSize - minSize) * ratio;
   }
+
+  size = Math.max(24, size);
 
   return {
     '--beat-size': `${size}px`,
@@ -112,7 +117,11 @@ const gapProgress = computed(() => {
         :class="[
           getBeatClass(beat),
           {
-            'is-active': isPlaying && currentBeat === index,
+              'is-active': isPlaying && currentBeat === index,
+              'is-next':
+                isPlaying &&
+                pattern.length > 1 &&
+                (currentBeat + 1) % pattern.length === index,
             'is-playing': isPlaying,
             'is-muted': isInGap,
           },
@@ -141,6 +150,25 @@ const gapProgress = computed(() => {
           {{ rowLength }}
         </button>
       </div>
+    </div>
+
+    <div v-if="!polyrhythmEnabled" class="beat-size-control" role="group" aria-label="Beat size">
+      <button
+        type="button"
+        title="Decrease beat size"
+        :disabled="(beatSizeAdjustment || 0) <= -16"
+        @click="emit('update:beatSizeAdjustment', Math.max(-16, (beatSizeAdjustment || 0) - 8))"
+      >
+        -
+      </button>
+      <button
+        type="button"
+        title="Increase beat size"
+        :disabled="(beatSizeAdjustment || 0) >= 24"
+        @click="emit('update:beatSizeAdjustment', Math.min(24, (beatSizeAdjustment || 0) + 8))"
+      >
+        +
+      </button>
     </div>
 
     <!-- Polyrhythm Visualizer -->
@@ -210,7 +238,8 @@ const gapProgress = computed(() => {
   }
 }
 
-.beats-per-row-control {
+.beats-per-row-control,
+.beat-size-control {
   position: absolute;
   top: 50%;
   right: $spacing-md;
@@ -253,6 +282,45 @@ const gapProgress = computed(() => {
     &.is-active {
       color: white;
       background: $accent-primary;
+    }
+  }
+}
+
+.beat-size-control {
+  top: auto;
+  right: auto;
+  bottom: $spacing-md;
+  left: $spacing-md;
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: hidden;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  transform: none;
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    color: $text-secondary;
+    font-size: $font-xl;
+    font-weight: 700;
+    background: $bg-tertiary;
+    border: 0;
+    border-right: 1px solid $border-color;
+    cursor: pointer;
+
+    &:last-child {
+      border-right: 0;
+    }
+
+    &:hover:not(:disabled) {
+      color: white;
+      background: $accent-primary;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
     }
   }
 }
@@ -401,6 +469,15 @@ const gapProgress = computed(() => {
     }
   }
 
+  &.is-next:not(.is-active) {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px $beat-flam;
+
+    &::before {
+      border-color: $beat-flam;
+    }
+  }
+
   &.is-playing {
     opacity: 0.6;
   }
@@ -468,6 +545,12 @@ const gapProgress = computed(() => {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+}
+
+@media (min-width: $breakpoint-md) {
+  .beat-size-control {
+    display: grid;
   }
 }
 </style>
