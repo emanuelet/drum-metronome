@@ -471,7 +471,6 @@ const gapProgress = computed(() => {
 
   &.is-next:not(.is-active) {
     transform: scale(1.1);
-    box-shadow: 0 0 12px $beat-flam;
 
     &::before {
       border-color: $beat-flam;
